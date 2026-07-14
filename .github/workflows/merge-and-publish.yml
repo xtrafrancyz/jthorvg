@@ -29,8 +29,6 @@ jobs:
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
-    env:
-      CI_NATIVE_DIR: ${{ runner.temp }}/jthorvg-ci-native
 
     steps:
       - name: Check out repository
@@ -41,6 +39,7 @@ jobs:
       - name: Set native build run ID
         shell: bash
         run: |
+          echo "CI_NATIVE_DIR=$RUNNER_TEMP/jthorvg-ci-native" >> "$GITHUB_ENV"
           if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
             echo "NATIVE_RUN_ID=${{ github.event.workflow_run.id }}" >> "$GITHUB_ENV"
           else
