@@ -11,4 +11,3 @@ plugins {
 }
 
 rootProject.name = "jthorvg"
-include("lib")

@@ -72,5 +72,5 @@ jobs:
           name: ${{ matrix.artifact-name }}
           if-no-files-found: error
           path: |
-            lib/build/libs/*
-            lib/build/native/${{ matrix.platform }}/*
+            build/libs/*
+            build/native/${{ matrix.platform }}/*

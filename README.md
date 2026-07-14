@@ -2,7 +2,7 @@
 
 `jthorvg` is a Gradle-based Java library that wraps a focused subset of the [ThorVG](https://github.com/thorvg/thorvg) C API through JNI.
 
-ThorVG is vendored into this repository under `vendor/thorvg`, and the native build links that vendored code directly into the JNI shared library so the final output is a single ready-to-load `.dll` or `.so`.
+ThorVG is vendored into this repository under `src/main/c/thorvg`, and the native build links that vendored code directly into the JNI shared library so the final output is a single ready-to-load `.dll` or `.so`.
 
 ## Included wrapper surface
 
@@ -16,14 +16,14 @@ The initial wrapper covers the core pieces needed to render with the software ca
 
 The JNI bridge is implemented against ThorVG's C API header from:
 
-`src/bindings/capi/thorvg_capi.h`
+`src/main/c/thorvg/src/bindings/capi/thorvg_capi.h`
 
 ## Project layout
 
 - `gradlew` / `gradlew.bat` — Gradle wrapper
-- `lib/src/main/java` — Java API
-- `lib/src/main/c/jthorvg_jni.c` — JNI bridge
-- `lib/src/test/java` — focused unit tests for the Java wrapper layer
+- `src/main/java` — Java API
+- `src/main/c/jthorvg_jni.c` — JNI bridge
+- `src/test/java` — focused unit tests for the Java wrapper layer
 
 ## Build and test
 
@@ -55,13 +55,13 @@ Required tools:
 Build the native library from the repository root with:
 
 ```bash
-./gradlew :lib:buildNative
+./gradlew buildNative
 ```
 
 The resulting shared library is written to:
 
-- Linux: `lib/build/native/linux/libjthorvg_jni.so`
-- Windows: `lib/build/native/windows/jthorvg_jni.dll`
+- Linux: `build/native/linux/libjthorvg_jni.so`
+- Windows: `build/native/windows/jthorvg_jni.dll`
 
 The default Gradle Java build also packages the current host's shared library into the main artifact resources.
 

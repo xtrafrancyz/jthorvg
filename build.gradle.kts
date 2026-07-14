@@ -27,7 +27,7 @@ java {
 
 val nativeLibraryBaseName = "jthorvg_jni"
 val packagedNativeResourcesDir = layout.buildDirectory.dir("generated/resources/main")
-val vendoredThorvgDir = rootProject.file("vendor/thorvg")
+val vendoredThorvgDir = project.file("src/main/c/thorvg")
 val javaHome = javaToolchains.launcherFor(java.toolchain).map { it.metadata.installationPath.asFile }
 
 val hostOs = providers.systemProperty("os.name").map { osName ->
