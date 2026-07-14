@@ -22,10 +22,10 @@ public final class RadialGradient extends Gradient {
      * @param fx The horizontal coordinate of the center of the start circle.
      * @param fy The vertical coordinate of the center of the start circle.
      * @param fr The radius of the start circle.
-     * @note In case the radius r is zero, an object is filled with a single color using the last color specified in the setColorStops().
-     * @note In case the focal point (fx and fy) lies outside the end circle, it is projected onto the edge of the end circle.
-     * @note If the start circle doesn't fully fit inside the end circle (after possible repositioning), the fr is reduced accordingly.
-     * @note By manipulating the position and size of the focal point, a wide range of visual effects can be achieved, such as directing
+     * <b>Note:</b> In case the radius r is zero, an object is filled with a single color using the last color specified in the setColorStops().
+     * <b>Note:</b> In case the focal point (fx and fy) lies outside the end circle, it is projected onto the edge of the end circle.
+     * <b>Note:</b> If the start circle doesn't fully fit inside the end circle (after possible repositioning), the fr is reduced accordingly.
+     * <b>Note:</b> By manipulating the position and size of the focal point, a wide range of visual effects can be achieved, such as directing
      *       the gradient focus towards a specific edge or enhancing the depth and complexity of shading patterns.
      *       If a focal effect is not desired, simply align the focal point (fx and fy) with the center of the end circle (cx and cy)
      *       and set the radius (fr) to zero. This will result in a uniform gradient without any focal variations.

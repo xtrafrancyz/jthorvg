@@ -18,7 +18,7 @@ public final class WGCanvas extends Canvas {
      * @param height     The height of the target.
      * @param colorspace Specifies how the pixel values should be interpreted. Currently, it allows ABGR8888 and ABGR8888S.
      * @param type       0: surface, 1: texture are used as presentable target.
-     * @warning Regardless of the value of colorspace, this target API uses the default alpha mode.
+     * <b>Warning:</b> Regardless of the value of colorspace, this target API uses the default alpha mode.
      */
     public void setTarget(long device, long instance, long target, int width, int height, ThorvgColorspace colorspace, int type) {
         ThorvgResult.fromCode(ThorvgNative.wgCanvasSetTarget(

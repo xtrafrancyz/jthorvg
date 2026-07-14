@@ -55,7 +55,7 @@ public final class Thorvg {
      * During initialization, ThorVG will spawn the specified number of threads.
      *
      * @param threads The number of worker threads to create. A value of zero indicates that only the main thread will be used.
-     * @note The initializer uses internal reference counting to track multiple calls.
+     * <b>Note:</b> The initializer uses internal reference counting to track multiple calls.
      *       The number of threads is fixed on the first call to init() and cannot be changed in subsequent calls.
      */
     public static void init(int threads) {
@@ -71,7 +71,7 @@ public final class Thorvg {
      * <p>
      * Cleans up resources and stops any internal threads initialized by init().
      *
-     * @note The initializer maintains a reference count for safe repeated use. Only the final call to term() will fully shut down the engine.
+     * <b>Note:</b> The initializer maintains a reference count for safe repeated use. Only the final call to term() will fully shut down the engine.
      */
     public static void term() {
         ensureLoaded();
@@ -133,7 +133,7 @@ public final class Thorvg {
      *
      * @param options The rendering engine options.
      * @return A new GLCanvas object.
-     * @note Currently, it does not support {@link ThorvgEngineOption#SMART_RENDER}. The request will be ignored.
+     * <b>Note:</b> Currently, it does not support {@link ThorvgEngineOption#SMART_RENDER}. The request will be ignored.
      */
     public static GLCanvas newGLCanvas(Set<ThorvgEngineOption> options) {
         ensureLoaded();
@@ -162,7 +162,7 @@ public final class Thorvg {
      *
      * @param options The rendering engine options.
      * @return A new WGCanvas object.
-     * @note Currently, it does not support {@link ThorvgEngineOption#SMART_RENDER}. The request will be ignored.
+     * <b>Note:</b> Currently, it does not support {@link ThorvgEngineOption#SMART_RENDER}. The request will be ignored.
      */
     public static WGCanvas newWGCanvas(Set<ThorvgEngineOption> options) {
         ensureLoaded();

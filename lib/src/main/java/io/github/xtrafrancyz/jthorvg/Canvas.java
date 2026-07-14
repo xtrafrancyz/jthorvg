@@ -21,10 +21,10 @@ public abstract class Canvas extends NativeHandle {
      * object until it is explicitly removed via remove().
      *
      * @param paint A handle to the paint object to be rendered.
-     * @note Ownership of the paint object is transferred to the canvas upon
+     * <b>Note:</b> Ownership of the paint object is transferred to the canvas upon
      *       successful addition. To retain ownership, call paint.ref()
      *       before adding it to the canvas.
-     * @note The rendering order of paint objects follows the order in which they are
+     * <b>Note:</b> The rendering order of paint objects follows the order in which they are
      *       added to the canvas. If layering is required, ensure paints are added in
      *       the desired order.
      */
@@ -46,10 +46,10 @@ public abstract class Canvas extends NativeHandle {
      * @param at     A handle to an existing paint object in the root scene before
      *               which target will be inserted. If null, target is
      *               appended to the end of the root scene.
-     * @note Ownership of the target object is transferred to the canvas upon
+     * <b>Note:</b> Ownership of the target object is transferred to the canvas upon
      *       successful addition. To retain ownership, call paint.ref()
      *       before adding it to the canvas.
-     * @note The rendering order of paint objects follows their order in the root
+     * <b>Note:</b> The rendering order of paint objects follows their order in the root
      *       scene. If layering is required, ensure paints are inserted in the
      *       desired order.
      */
@@ -85,9 +85,9 @@ public abstract class Canvas extends NativeHandle {
      * @param y      The y-coordinate of the upper-left corner of the rectangle.
      * @param width  The width of the rectangle.
      * @param height The height of the rectangle.
-     * @warning Changing the viewport is not allowed after calling add(),
+     * <b>Warning:</b> Changing the viewport is not allowed after calling add(),
      *          remove(), update(), or draw().
-     * @note When the target is reset, the viewport will also be reset to match the target size.
+     * <b>Note:</b> When the target is reset, the viewport will also be reset to match the target size.
      */
     public void setViewport(int x, int y, int width, int height) {
         ThorvgResult.fromCode(ThorvgNative.canvasSetViewport(requireHandle(), x, y, width, height))
@@ -100,8 +100,8 @@ public abstract class Canvas extends NativeHandle {
      * This function triggers an internal update for all paint instances that have been modified
      * since the last update. It ensures that the canvas state is ready for accurate rendering.
      *
-     * @note Only paint objects that have been changed will be processed.
-     * @note If the canvas is configured with multiple threads, the update may be performed asynchronously.
+     * <b>Note:</b> Only paint objects that have been changed will be processed.
+     * <b>Note:</b> If the canvas is configured with multiple threads, the update may be performed asynchronously.
      */
     public void update() {
         ThorvgResult.fromCode(ThorvgNative.canvasUpdate(requireHandle())).throwIfError("tvg_canvas_update");
@@ -111,11 +111,11 @@ public abstract class Canvas extends NativeHandle {
      * Requests the canvas to render the Paint objects.
      *
      * @param clear If true, clears the target buffer to zero before drawing.
-     * @note Clearing the buffer is unnecessary if the canvas will be fully covered
+     * <b>Note:</b> Clearing the buffer is unnecessary if the canvas will be fully covered
      *       with opaque content. Skipping the clear can improve performance.
-     * @note Drawing may be performed asynchronously if the thread count is greater than zero.
+     * <b>Note:</b> Drawing may be performed asynchronously if the thread count is greater than zero.
      *       To ensure the drawing process is complete, call sync() afterwards.
-     * @note If the canvas has not been updated prior to draw(), it may implicitly perform update()
+     * <b>Note:</b> If the canvas has not been updated prior to draw(), it may implicitly perform update()
      */
     public void draw(boolean clear) {
         ThorvgResult.fromCode(ThorvgNative.canvasDraw(requireHandle(), clear)).throwIfError("tvg_canvas_draw");

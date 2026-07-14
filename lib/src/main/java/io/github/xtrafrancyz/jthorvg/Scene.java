@@ -19,10 +19,10 @@ public final class Scene extends Paint {
      *
      * @param paint A handle to the paint object to be added to the scene.
      *              This parameter must not be null.
-     * @note Ownership of the paint object is transferred to the canvas upon
+     * <b>Note:</b> Ownership of the paint object is transferred to the canvas upon
      *       successful addition. To retain ownership, call paint.ref()
      *       before adding it to the scene.
-     * @note The rendering order of paint objects follows their order in the root
+     * <b>Note:</b> The rendering order of paint objects follows their order in the root
      *       scene. If layering is required, ensure the paints are added in the
      *       desired order.
      */
@@ -43,10 +43,10 @@ public final class Scene extends Paint {
      * @param at     A handle to an existing paint object in the scene before
      *               which target will be inserted.
      *               This parameter must not be null.
-     * @note Ownership of the target object is transferred to the scene upon
+     * <b>Note:</b> Ownership of the target object is transferred to the scene upon
      *       successful addition. To retain ownership, call paint.ref()
      *       before adding it to the scene.
-     * @note The rendering order of paint objects follows their order in the root
+     * <b>Note:</b> The rendering order of paint objects follows their order in the root
      *       scene. If layering is required, ensure the paints are added in the
      *       desired order.
      */

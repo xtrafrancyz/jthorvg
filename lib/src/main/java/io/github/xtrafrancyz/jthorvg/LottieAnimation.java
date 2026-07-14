@@ -37,7 +37,7 @@ public final class LottieAnimation extends Animation {
      * Deletes a previously generated slot.
      *
      * @param id The ID of the slot to delete.
-     * @note This function should be paired with genSlot.
+     * <b>Note:</b> This function should be paired with genSlot.
      */
     public void delSlot(int id) {
         ThorvgResult.fromCode(ThorvgNative.lottieAnimationDelSlot(requireHandle(), id))
@@ -120,7 +120,7 @@ public final class LottieAnimation extends Animation {
      *
      * @param value The quality level (0-100). 0 represents lowest quality/best performance,
      *              100 represents highest quality/lowest performance, default is 50.
-     * @note This option is used as a hint; its behavior heavily depends on the render backend.
+     * <b>Note:</b> This option is used as a hint; its behavior heavily depends on the render backend.
      */
     public void setQuality(int value) {
         ThorvgResult.fromCode(ThorvgNative.lottieAnimationSetQuality(requireHandle(), value))
@@ -134,7 +134,7 @@ public final class LottieAnimation extends Animation {
      * It allows applications to synchronize audio playback with the animation timeline.
      *
      * @param resolver A LottieAudioResolver instance.
-     * @note To disable audio notifications, pass null as resolver.
+     * <b>Note:</b> To disable audio notifications, pass null as resolver.
      */
     public void setAudioResolver(LottieAudioResolver resolver) {
         ThorvgResult.fromCode(ThorvgNative.lottieAnimationSetAudioResolver(requireHandle(), resolver))

@@ -23,7 +23,7 @@ public final class Saver extends NativeHandle {
      * @param paint   The paint to be saved with all its associated properties.
      * @param path    A path to the file, in which the paint data is to be saved.
      * @param quality The encoded quality level. 0 is the minimum, 100 is the maximum value(recommended).
-     * @note Saving can be asynchronous if the assigned thread number is greater than zero. To guarantee the saving is done, call sync() afterwards.
+     * <b>Note:</b> Saving can be asynchronous if the assigned thread number is greater than zero. To guarantee the saving is done, call sync() afterwards.
      */
     public void savePaint(Paint paint, String path, int quality) {
         Objects.requireNonNull(paint, "paint");
@@ -43,8 +43,8 @@ public final class Saver extends NativeHandle {
      * @param path      A path to the file, in which the animation data is to be saved.
      * @param quality   The encoded quality level. 0 is the minimum, 100 is the maximum value(recommended).
      * @param fps       The frames per second for the animation. If 0, the default fps is used.
-     * @note A higher frames per second (FPS) would result in a larger file size. It is recommended to use the default value.
-     * @note Saving can be asynchronous if the assigned thread number is greater than zero. To guarantee the saving is done, call sync() afterwards.
+     * <b>Note:</b> A higher frames per second (FPS) would result in a larger file size. It is recommended to use the default value.
+     * <b>Note:</b> Saving can be asynchronous if the assigned thread number is greater than zero. To guarantee the saving is done, call sync() afterwards.
      */
     public void saveAnimation(Animation animation, String path, int quality, int fps) {
         Objects.requireNonNull(animation, "animation");

@@ -65,7 +65,7 @@ public final class Shape extends Paint {
      *
      * @param x The horizontal coordinate of the end-point of the line.
      * @param y The vertical coordinate of the end-point of the line.
-     * @note In case this is the first command in the path, it corresponds to the moveTo() call.
+     * <b>Note:</b> In case this is the first command in the path, it corresponds to the moveTo() call.
      */
     public void lineTo(float x, float y) {
         ThorvgResult.fromCode(ThorvgNative.shapeLineTo(requireHandle(), x, y))
@@ -84,7 +84,7 @@ public final class Shape extends Paint {
      * @param cy2 The vertical coordinate of the 2nd control point.
      * @param x   The horizontal coordinate of the endpoint of the curve.
      * @param y   The vertical coordinate of the endpoint of the curve.
-     * @note In case this is the first command in the path, no data from the path are rendered.
+     * <b>Note:</b> In case this is the first command in the path, no data from the path are rendered.
      */
     public void cubicTo(float cx1, float cy1, float cx2, float cy2, float x, float y) {
         ThorvgResult.fromCode(ThorvgNative.shapeCubicTo(requireHandle(), cx1, cy1, cx2, cy2, x, y))
@@ -123,7 +123,7 @@ public final class Shape extends Paint {
      * @param rx        The x-axis radius of the ellipse defining the rounded corners of the rectangle.
      * @param ry        The y-axis radius of the ellipse defining the rounded corners of the rectangle.
      * @param clockwise Specifies the path direction: true for clockwise, false for counterclockwise.
-     * @note For rx and ry greater than or equal to the half of w and the half of h, respectively, the shape become an ellipse.
+     * <b>Note:</b> For rx and ry greater than or equal to the half of w and the half of h, respectively, the shape become an ellipse.
      */
     public void appendRect(float x, float y, float width, float height, float rx, float ry, boolean clockwise) {
         ThorvgResult.fromCode(ThorvgNative.shapeAppendRect(requireHandle(), x, y, width, height, rx, ry, clockwise))
@@ -192,7 +192,7 @@ public final class Shape extends Paint {
      * path's geometry.
      *
      * @param width The width of the stroke in pixels. Must be positive value. (The default is 0)
-     * @note A value of width 0 disables the stroke.
+     * <b>Note:</b> A value of width 0 disables the stroke.
      */
     public void setStrokeWidth(float width) {
         ThorvgResult.fromCode(ThorvgNative.shapeSetStrokeWidth(requireHandle(), width))
@@ -218,8 +218,8 @@ public final class Shape extends Paint {
      * @param green The green color channel value in the range [0 ~ 255]. The default value is 0.
      * @param blue  The blue color channel value in the range [0 ~ 255]. The default value is 0.
      * @param alpha The alpha channel value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque.
-     * @note If the stroke width is 0 (default), the stroke will not be visible regardless of the color.
-     * @note Either a solid color or a gradient fill is applied, depending on what was set as last.
+     * <b>Note:</b> If the stroke width is 0 (default), the stroke will not be visible regardless of the color.
+     * <b>Note:</b> Either a solid color or a gradient fill is applied, depending on what was set as last.
      */
     public void setStrokeColor(int red, int green, int blue, int alpha) {
         validateColorComponent("red", red);
@@ -246,7 +246,7 @@ public final class Shape extends Paint {
      * Sets the gradient fill of the stroke for all of the figures from the path.
      *
      * @param gradient The gradient fill.
-     * @note Either a solid color or a gradient fill is applied, depending on what was set as last.
+     * <b>Note:</b> Either a solid color or a gradient fill is applied, depending on what was set as last.
      */
     public void setStrokeGradient(Gradient gradient) {
         ThorvgResult.fromCode(ThorvgNative.shapeSetStrokeGradient(requireHandle(), gradient.requireHandle()))
@@ -270,10 +270,10 @@ public final class Shape extends Paint {
      *
      * @param dashPattern An array of alternating dash and gap lengths.
      * @param offset      The shift of the starting point within the repeating dash pattern, from which the pattern begins to be applied.
-     * @note To reset the stroke dash pattern, pass null to dashPattern.
-     * @note Values of dashPattern less than zero are treated as zero.
-     * @note If all values in the dashPattern are equal to or less than 0, the dash is ignored.
-     * @note If the dashPattern contains an odd number of elements, the sequence is repeated in the same
+     * <b>Note:</b> To reset the stroke dash pattern, pass null to dashPattern.
+     * <b>Note:</b> Values of dashPattern less than zero are treated as zero.
+     * <b>Note:</b> If all values in the dashPattern are equal to or less than 0, the dash is ignored.
+     * <b>Note:</b> If the dashPattern contains an odd number of elements, the sequence is repeated in the same
      *       order to form an even-length pattern, preserving the alternation of dashes and gaps.
      */
     public void setStrokeDash(float[] dashPattern, float offset) {
@@ -387,7 +387,7 @@ public final class Shape extends Paint {
      * @param green The green color channel value in the range [0 ~ 255]. The default value is 0.
      * @param blue  The blue color channel value in the range [0 ~ 255]. The default value is 0.
      * @param alpha The alpha channel value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque. The default value is 0.
-     * @note Either a solid color or a gradient fill is applied, depending on what was set as last.
+     * <b>Note:</b> Either a solid color or a gradient fill is applied, depending on what was set as last.
      */
     public void setFillColor(int red, int green, int blue, int alpha) {
         validateColorComponent("red", red);
@@ -454,7 +454,7 @@ public final class Shape extends Paint {
      * The parts of the shape defined as inner are filled.
      *
      * @param gradient The gradient fill.
-     * @note Either a solid color or a gradient fill is applied, depending on what was set as last.
+     * <b>Note:</b> Either a solid color or a gradient fill is applied, depending on what was set as last.
      */
     public void setGradient(Gradient gradient) {
         ThorvgResult.fromCode(ThorvgNative.shapeSetGradient(requireHandle(), gradient.requireHandle()))

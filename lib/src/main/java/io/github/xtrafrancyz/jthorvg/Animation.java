@@ -14,7 +14,7 @@ public class Animation extends NativeHandle {
      * Specifies the current frame in the animation.
      *
      * @param no The index of the animation frame to be displayed. The index should be less than the getTotalFrame().
-     * @note For efficiency, ThorVG ignores updates to the new frame value if the difference from the current frame value
+     * <b>Note:</b> For efficiency, ThorVG ignores updates to the new frame value if the difference from the current frame value
      *       is less than 0.001. In such cases, it returns Result::InsufficientCondition.
      *       Values less than 0.001 may be disregarded and may not be accurately retained by the Animation.
      */
@@ -31,7 +31,7 @@ public class Animation extends NativeHandle {
      * with this Animation instance.
      *
      * @return A picture instance handle that is tied to this animation.
-     * @warning The picture instance is owned by Animation. It should not be deleted manually.
+     * <b>Warning:</b> The picture instance is owned by Animation. It should not be deleted manually.
      */
     public final long getPicture() {
         return ThorvgNative.animationGetPicture(requireHandle());
@@ -53,8 +53,8 @@ public class Animation extends NativeHandle {
      * Retrieves the total number of frames in the animation.
      *
      * @return The total number of frames in the animation.
-     * @note Frame numbering starts from 0.
-     * @note If the Picture is not properly configured, this function will return 0.
+     * <b>Note:</b> Frame numbering starts from 0.
+     * <b>Note:</b> If the Picture is not properly configured, this function will return 0.
      */
     public final float getTotalFrame() {
         float[] out = new float[1];
@@ -67,7 +67,7 @@ public class Animation extends NativeHandle {
      * Retrieves the duration of the animation in seconds.
      *
      * @return The duration of the animation in seconds.
-     * @note If the Picture is not properly configured, this function will return 0.
+     * <b>Note:</b> If the Picture is not properly configured, this function will return 0.
      */
     public final float getDuration() {
         float[] out = new float[1];
@@ -86,8 +86,8 @@ public class Animation extends NativeHandle {
      *
      * @param begin segment begin frame.
      * @param end   segment end frame.
-     * @note Animation allows a range from 0.0 to the total frame. end should not be lower than begin.
-     * @note If a marker has been specified, its range will be disregarded.
+     * <b>Note:</b> Animation allows a range from 0.0 to the total frame. end should not be lower than begin.
+     * <b>Note:</b> If a marker has been specified, its range will be disregarded.
      */
     public final void setSegment(float begin, float end) {
         ThorvgResult.fromCode(ThorvgNative.animationSetSegment(requireHandle(), begin, end))

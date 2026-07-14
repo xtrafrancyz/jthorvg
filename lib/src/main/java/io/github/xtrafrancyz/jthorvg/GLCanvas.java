@@ -21,7 +21,7 @@ public final class GLCanvas extends Canvas {
      * @param width      The width (in pixels) of the raster image.
      * @param height     The height (in pixels) of the raster image.
      * @param colorspace Specifies how the pixel values should be interpreted. Currently, it only allows {@link ThorvgColorspace#ABGR8888S} as GL_RGBA8.
-     * @note If display and surface are not provided, the ThorVG GL engine assumes that
+     * <b>Note:</b> If display and surface are not provided, the ThorVG GL engine assumes that
      *       the appropriate OpenGL context is already current and will not attempt to bind a new one.
      */
     public void setTarget(long display, long surface, long context, int id, int width, int height, ThorvgColorspace colorspace) {

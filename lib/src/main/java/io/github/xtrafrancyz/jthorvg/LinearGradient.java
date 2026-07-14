@@ -19,7 +19,7 @@ public final class LinearGradient extends Gradient {
      * @param y1 The vertical coordinate of the first point used to determine the gradient bounds.
      * @param x2 The horizontal coordinate of the second point used to determine the gradient bounds.
      * @param y2 The vertical coordinate of the second point used to determine the gradient bounds.
-     * @note In case the first and the second points are equal, an object is filled with a single color using the last color specified in the setColorStops().
+     * <b>Note:</b> In case the first and the second points are equal, an object is filled with a single color using the last color specified in the setColorStops().
      */
     public void set(float x1, float y1, float x2, float y2) {
         ThorvgResult.fromCode(ThorvgNative.linearGradientSet(requireHandle(), x1, y1, x2, y2))

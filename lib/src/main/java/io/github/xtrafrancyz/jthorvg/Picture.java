@@ -91,7 +91,7 @@ public final class Picture extends Paint {
      * or substituting assets, such as loading from an external source or a virtual filesystem.
      *
      * @param resolver A user-defined resolver instance.
-     * @note This function must be called before load()
+     * <b>Note:</b> This function must be called before load()
      *       Setting the resolver after loading will have no effect on asset resolution for that asset.
      */
     public void setAssetResolver(PictureAssetResolver resolver) {
