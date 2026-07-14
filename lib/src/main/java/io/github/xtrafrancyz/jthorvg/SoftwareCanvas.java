@@ -1,5 +1,8 @@
 package io.github.xtrafrancyz.jthorvg;
 
+/**
+ * A module for rendering the graphical elements using the software engine.
+ */
 public final class SoftwareCanvas extends Canvas {
     private SoftwareCanvasTarget target;
 
@@ -7,6 +10,16 @@ public final class SoftwareCanvas extends Canvas {
         super(handle);
     }
 
+    /**
+     * Sets the buffer used in the rasterization process and defines the used colorspace.
+     * <p>
+     * For optimisation reasons TVG does not allocate memory for the output buffer on its own.
+     * The buffer of a desirable size should be allocated and owned by the caller.
+     *
+     * @param target The software canvas target buffer configuration.
+     * <b>Warning:</b> Do not access buffer during draw() - sync(). It should not be accessed while the engine is writing on it.
+     * <b>Note:</b> Currently, only TVG_COLORSPACE_ABGR8888, TVG_COLORSPACE_ARGB8888, TVG_COLORSPACE_ABGR8888S, and TVG_COLORSPACE_ARGB8888S are supported for cs.
+     */
     public void setTarget(SoftwareCanvasTarget target) {
         ThorvgResult.fromCode(ThorvgNative.swCanvasSetTarget(
             requireHandle(),
