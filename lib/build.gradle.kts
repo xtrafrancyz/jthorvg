@@ -58,12 +58,27 @@ fun resolveThorvgStaticLibrary(buildDir: File, os: String): File {
         return expectedFile
     }
 
-    return buildDir.walkTopDown()
+    val matchedFile = buildDir.walkTopDown()
         .firstOrNull { it.isFile && it.name.equals(expectedFileName, ignoreCase = false) }
-        ?: throw GradleException(
-            "ThorVG static library was not produced at ${expectedFile.absolutePath} " +
-                "and no matching '$expectedFileName' file was found under ${buildDir.absolutePath}."
-        )
+    if (matchedFile != null) {
+        return matchedFile
+    }
+
+    val fileList = mutableListOf<String>()
+    if (buildDir.exists()) {
+        buildDir.walkTopDown().forEach {
+            if (it.isFile) {
+                fileList.add(it.relativeTo(buildDir).path)
+            }
+        }
+    }
+    val filesDump = fileList.joinToString("\n") { " - $it" }
+
+    throw GradleException(
+        "ThorVG static library was not produced at ${expectedFile.absolutePath} " +
+            "and no matching '$expectedFileName' file was found under ${buildDir.absolutePath}.\n" +
+            "Found files in build directory:\n$filesDump"
+    )
 }
 
 fun ensureVendoredThorvg() {
