@@ -57,6 +57,17 @@ fun ensureVendoredThorvg() {
     }
 }
 
+fun runCommand(workingDir: File, vararg command: String) {
+    val process = ProcessBuilder(*command)
+        .directory(workingDir)
+        .inheritIO()
+        .start()
+    val exitCode = process.waitFor()
+    if (exitCode != 0) {
+        throw GradleException("Command failed with exit code $exitCode: ${command.joinToString(" ")}")
+    }
+}
+
 sourceSets.named("main") {
     resources.srcDir(packagedNativeResourcesDir)
 }
@@ -110,12 +121,8 @@ val buildVendoredThorvg = tasks.register("buildVendoredThorvg") {
             "-Dpartial=true"
         )
 
-        exec {
-            commandLine(setupArgs)
-        }
-        exec {
-            commandLine("meson", "compile", "-C", buildDir.absolutePath)
-        }
+        runCommand(project.rootDir, *setupArgs.toTypedArray())
+        runCommand(project.rootDir, "meson", "compile", "-C", buildDir.absolutePath)
 
         if (!outputFile.isFile) {
             throw GradleException("ThorVG static library was not produced at ${outputFile.absolutePath}.")
@@ -164,39 +171,35 @@ val buildNative = tasks.register("buildNative") {
         outputFile.parentFile.mkdirs()
 
         when (os) {
-            "windows" -> exec {
-                workingDir = projectDir
-                commandLine(
-                    "cl",
-                    "/nologo",
-                    "/LD",
-                    "/I${javaIncludeDir.absolutePath}",
-                    "/I${javaPlatformIncludeDir.absolutePath}",
-                    "/I${capiIncludeDir.absolutePath}",
-                    jniSource.absolutePath,
-                    thorvgStaticLibrary.absolutePath,
-                    "/link",
-                    "/OUT:${outputFile.absolutePath}"
-                )
-            }
+            "windows" -> runCommand(
+                projectDir,
+                "cl",
+                "/nologo",
+                "/LD",
+                "/I${javaIncludeDir.absolutePath}",
+                "/I${javaPlatformIncludeDir.absolutePath}",
+                "/I${capiIncludeDir.absolutePath}",
+                jniSource.absolutePath,
+                thorvgStaticLibrary.absolutePath,
+                "/link",
+                "/OUT:${outputFile.absolutePath}"
+            )
 
-            "linux" -> exec {
-                workingDir = projectDir
-                commandLine(
-                    "gcc",
-                    "-shared",
-                    "-fPIC",
-                    "-I${javaIncludeDir.absolutePath}",
-                    "-I${javaPlatformIncludeDir.absolutePath}",
-                    "-I${capiIncludeDir.absolutePath}",
-                    jniSource.absolutePath,
-                    thorvgStaticLibrary.absolutePath,
-                    "-lstdc++",
-                    "-lpthread",
-                    "-o",
-                    outputFile.absolutePath
-                )
-            }
+            "linux" -> runCommand(
+                projectDir,
+                "gcc",
+                "-shared",
+                "-fPIC",
+                "-I${javaIncludeDir.absolutePath}",
+                "-I${javaPlatformIncludeDir.absolutePath}",
+                "-I${capiIncludeDir.absolutePath}",
+                jniSource.absolutePath,
+                thorvgStaticLibrary.absolutePath,
+                "-lstdc++",
+                "-lpthread",
+                "-o",
+                outputFile.absolutePath
+            )
         }
 
         if (!outputFile.isFile) {
@@ -212,6 +215,10 @@ val packageNative = tasks.register<Sync>("packageNative") {
 }
 
 tasks.named<ProcessResources>("processResources") {
+    dependsOn(packageNative)
+}
+
+tasks.named<Jar>("sourcesJar") {
     dependsOn(packageNative)
 }
 
