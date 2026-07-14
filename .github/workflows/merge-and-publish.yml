@@ -40,6 +40,7 @@ jobs:
         shell: bash
         run: |
           echo "CI_NATIVE_DIR=$RUNNER_TEMP/jthorvg-ci-native" >> "$GITHUB_ENV"
+          echo "CI_DOWNLOAD_DIR=$RUNNER_TEMP/downloads" >> "$GITHUB_ENV"
           if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
             echo "NATIVE_RUN_ID=${{ github.event.workflow_run.id }}" >> "$GITHUB_ENV"
           else
@@ -60,7 +61,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: jthorvg-native-linux-amd64
-          path: ${{ env.CI_NATIVE_DIR }}/linux-artifact
+          path: ${{ env.CI_DOWNLOAD_DIR }}/linux-artifact
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: ${{ env.NATIVE_RUN_ID }}
@@ -69,7 +70,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: jthorvg-native-windows-amd64
-          path: ${{ env.CI_NATIVE_DIR }}/windows-artifact
+          path: ${{ env.CI_DOWNLOAD_DIR }}/windows-artifact
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: ${{ env.NATIVE_RUN_ID }}
@@ -79,8 +80,8 @@ jobs:
         run: |
           rm -rf "$CI_NATIVE_DIR/linux" "$CI_NATIVE_DIR/windows"
           mkdir -p "$CI_NATIVE_DIR/linux" "$CI_NATIVE_DIR/windows"
-          cp "$(find "$CI_NATIVE_DIR/linux-artifact" -type f -name 'libjthorvg_jni.so' | head -n 1)" "$CI_NATIVE_DIR/linux/libjthorvg_jni.so"
-          cp "$(find "$CI_NATIVE_DIR/windows-artifact" -type f -name 'jthorvg_jni.dll' | head -n 1)" "$CI_NATIVE_DIR/windows/jthorvg_jni.dll"
+          cp "$(find "$CI_DOWNLOAD_DIR/linux-artifact" -type f -name 'libjthorvg_jni.so' | head -n 1)" "$CI_NATIVE_DIR/linux/libjthorvg_jni.so"
+          cp "$(find "$CI_DOWNLOAD_DIR/windows-artifact" -type f -name 'jthorvg_jni.dll' | head -n 1)" "$CI_NATIVE_DIR/windows/jthorvg_jni.dll"
           test -f "$CI_NATIVE_DIR/linux/libjthorvg_jni.so"
           test -f "$CI_NATIVE_DIR/windows/jthorvg_jni.dll"
 
