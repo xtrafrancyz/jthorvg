@@ -14,13 +14,15 @@ public class Animation extends NativeHandle {
      * Specifies the current frame in the animation.
      *
      * @param no The index of the animation frame to be displayed. The index should be less than the getTotalFrame().
-     * <b>Note:</b> For efficiency, ThorVG ignores updates to the new frame value if the difference from the current frame value
-     *       is less than 0.001. In such cases, it returns Result::InsufficientCondition.
-     *       Values less than 0.001 may be disregarded and may not be accurately retained by the Animation.
+     *           <b>Note:</b> For efficiency, ThorVG ignores updates to the new frame value if the difference from the current frame value
+     *           is less than 0.001. In such cases, it returns Result::InsufficientCondition.
+     *           Values less than 0.001 may be disregarded and may not be accurately retained by the Animation.
      */
     public final void setFrame(float no) {
-        ThorvgResult.fromCode(ThorvgNative.animationSetFrame(requireHandle(), no))
-            .throwIfError("tvg_animation_set_frame");
+        ThorvgResult result = ThorvgResult.fromCode(ThorvgNative.animationSetFrame(requireHandle(), no));
+        if (result == ThorvgResult.INSUFFICIENT_CONDITION)
+            return; // Ignore if the difference is less than 0.001
+        result.throwIfError("tvg_animation_set_frame");
     }
 
     /**
@@ -33,8 +35,8 @@ public class Animation extends NativeHandle {
      * @return A picture instance handle that is tied to this animation.
      * <b>Warning:</b> The picture instance is owned by Animation. It should not be deleted manually.
      */
-    public final long getPicture() {
-        return ThorvgNative.animationGetPicture(requireHandle());
+    public final Picture getPicture() {
+        return new Picture(ThorvgNative.animationGetPicture(requireHandle()), false);
     }
 
     /**
@@ -86,8 +88,8 @@ public class Animation extends NativeHandle {
      *
      * @param begin segment begin frame.
      * @param end   segment end frame.
-     * <b>Note:</b> Animation allows a range from 0.0 to the total frame. end should not be lower than begin.
-     * <b>Note:</b> If a marker has been specified, its range will be disregarded.
+     *              <b>Note:</b> Animation allows a range from 0.0 to the total frame. end should not be lower than begin.
+     *              <b>Note:</b> If a marker has been specified, its range will be disregarded.
      */
     public final void setSegment(float begin, float end) {
         ThorvgResult.fromCode(ThorvgNative.animationSetSegment(requireHandle(), begin, end))

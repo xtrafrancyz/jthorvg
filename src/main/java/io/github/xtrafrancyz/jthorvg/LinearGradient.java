@@ -19,7 +19,7 @@ public final class LinearGradient extends Gradient {
      * @param y1 The vertical coordinate of the first point used to determine the gradient bounds.
      * @param x2 The horizontal coordinate of the second point used to determine the gradient bounds.
      * @param y2 The vertical coordinate of the second point used to determine the gradient bounds.
-     * <b>Note:</b> In case the first and the second points are equal, an object is filled with a single color using the last color specified in the setColorStops().
+     *           <b>Note:</b> In case the first and the second points are equal, an object is filled with a single color using the last color specified in the setColorStops().
      */
     public void set(float x1, float y1, float x2, float y2) {
         ThorvgResult.fromCode(ThorvgNative.linearGradientSet(requireHandle(), x1, y1, x2, y2))
@@ -40,5 +40,17 @@ public final class LinearGradient extends Gradient {
         ThorvgResult.fromCode(ThorvgNative.linearGradientGet(requireHandle(), out))
             .throwIfError("tvg_linear_gradient_get");
         return out;
+    }
+
+    /**
+     * Duplicates the given Gradient object.
+     * <p>
+     * Creates a new object and sets its all properties as in the original object.
+     *
+     * @return A copied Gradient object handle.
+     */
+    @Override
+    public LinearGradient duplicate() {
+        return new LinearGradient(ThorvgNative.gradientDuplicate(requireHandle()));
     }
 }

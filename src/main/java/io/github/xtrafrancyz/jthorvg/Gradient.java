@@ -15,6 +15,7 @@ public abstract class Gradient extends NativeHandle {
     public static final class ColorStops {
         public final float[] offsets;
         public final int[] colors;
+
         public ColorStops(float[] offsets, int[] colors) {
             this.offsets = offsets;
             this.colors = colors;
@@ -118,9 +119,7 @@ public abstract class Gradient extends NativeHandle {
      *
      * @return A copied Gradient object handle.
      */
-    public final long duplicate() {
-        return ThorvgNative.gradientDuplicate(requireHandle());
-    }
+    public abstract Gradient duplicate();
 
     /**
      * Deletes the given gradient object.

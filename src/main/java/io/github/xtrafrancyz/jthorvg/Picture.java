@@ -8,8 +8,15 @@ import java.util.Objects;
  * A module enabling to create and to load an image in one of the supported formats: svg, png, jpg, lottie and raw.
  */
 public final class Picture extends Paint {
+    private boolean freeOnClose = true;
+
     Picture(long handle) {
         super(handle);
+    }
+
+    Picture(long handle, boolean freeOnClose) {
+        super(handle);
+        this.freeOnClose = freeOnClose;
     }
 
     /**
@@ -91,8 +98,8 @@ public final class Picture extends Paint {
      * or substituting assets, such as loading from an external source or a virtual filesystem.
      *
      * @param resolver A user-defined resolver instance.
-     * <b>Note:</b> This function must be called before load()
-     *       Setting the resolver after loading will have no effect on asset resolution for that asset.
+     *                 <b>Note:</b> This function must be called before load()
+     *                 Setting the resolver after loading will have no effect on asset resolution for that asset.
      */
     public void setAssetResolver(PictureAssetResolver resolver) {
         ThorvgResult.fromCode(ThorvgNative.pictureSetAssetResolver(requireHandle(), resolver))
@@ -204,5 +211,12 @@ public final class Picture extends Paint {
     public void setAccessible(boolean accessible) {
         ThorvgResult.fromCode(ThorvgNative.pictureSetAccessible(requireHandle(), accessible))
             .throwIfError("tvg_picture_set_accessible");
+    }
+
+    @Override
+    public void close() {
+        if (!freeOnClose)
+            return;
+        super.close();
     }
 }
