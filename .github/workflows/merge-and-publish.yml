@@ -99,7 +99,9 @@ jobs:
             !build/libs/*-javadoc.jar
 
       - name: Publish final JAR
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
+        if: >
+          (github.event_name == 'workflow_dispatch' && inputs.publish) ||
+          (github.event_name == 'workflow_run' && startsWith(github.event.workflow_run.head_branch, 'v'))
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
