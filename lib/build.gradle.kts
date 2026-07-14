@@ -50,7 +50,7 @@ fun resolveThorvgStaticLibrary(buildDir: File, os: String): File {
     if (!expectedFile.isFile)
 		throw GradleException("ThorVG static library was not produced at ${expectedFile.absolutePath} ")
 
-	if (os.equals("windows")) {
+	if (os == "windows") {
 		val windowsLibFile = expectedFile.parentFile.resolve("thorvg.lib")
 		try {
             expectedFile.copyTo(target = windowsLibFile, overwrite = true)
@@ -82,6 +82,21 @@ fun runCommand(workingDir: File, vararg command: String) {
     val exitCode = process.waitFor()
     if (exitCode != 0) {
         throw GradleException("Command failed with exit code $exitCode: ${command.joinToString(" ")}")
+    }
+}
+
+fun commandExists(workingDir: File, command: String): Boolean {
+    return try {
+        val process = ProcessBuilder("cmd", "/c", "where", command)
+            .directory(workingDir)
+            .redirectErrorStream(true)
+            .start()
+        process.inputStream.bufferedReader().useLines { lines ->
+            lines.forEach { _ -> }
+        }
+        process.waitFor() == 0
+    } catch (_: Exception) {
+        false
     }
 }
 
@@ -171,6 +186,7 @@ val buildNative = tasks.register("buildNative") {
         val os = hostOs.get()
         val toolchainJavaHome = javaHome.get()
         val thorvgBuildDir = layout.buildDirectory.dir("thorvg/$os").get().asFile
+        val thorvgStaticArchive = thorvgBuildDir.resolve("src/libthorvg-1.a")
         val thorvgStaticLibrary = resolveThorvgStaticLibrary(thorvgBuildDir, os)
         val outputFile = layout.buildDirectory.file("native/$os/${nativeLibraryFileName(os)}").get().asFile
         val javaIncludeDir = toolchainJavaHome.resolve("include")
@@ -189,24 +205,51 @@ val buildNative = tasks.register("buildNative") {
         outputFile.parentFile.mkdirs()
 
         when (os) {
-            "windows" -> runCommand(
-                projectDir,
-                "cl",
-                "/nologo",
-                "/LD",
-                "/MD",
-                "/DTVG_STATIC",
-                "/I${javaIncludeDir.absolutePath}",
-                "/I${javaPlatformIncludeDir.absolutePath}",
-                "/I${capiIncludeDir.absolutePath}",
-                jniSource.absolutePath,
-                thorvgStaticLibrary.absolutePath,
-                "/link",
-                "/OUT:${outputFile.absolutePath}",
-                "ucrt.lib",
-                "vcruntime.lib",
-                "msvcrt.lib"
-            )
+            "windows" -> {
+                if (commandExists(projectDir, "cl")) {
+                    logger.lifecycle("MSVC toolchain detected; building native library with cl.")
+                    runCommand(
+                        projectDir,
+                        "cl",
+                        "/nologo",
+                        "/LD",
+                        "/MD",
+                        "/DTVG_STATIC",
+                        "/I${javaIncludeDir.absolutePath}",
+                        "/I${javaPlatformIncludeDir.absolutePath}",
+                        "/I${capiIncludeDir.absolutePath}",
+                        jniSource.absolutePath,
+                        thorvgStaticLibrary.absolutePath,
+                        "/link",
+                        "/OUT:${outputFile.absolutePath}",
+                        "ucrt.lib",
+                        "vcruntime.lib",
+                        "msvcrt.lib"
+                    )
+                } else {
+                    logger.lifecycle("MSVC toolchain is unavailable; retrying native build with MinGW g++.")
+                    runCommand(
+                        projectDir,
+                        "g++",
+                        "-shared",
+                        "-DTVG_STATIC",
+                        "-I${javaIncludeDir.absolutePath}",
+                        "-I${javaPlatformIncludeDir.absolutePath}",
+                        "-I${capiIncludeDir.absolutePath}",
+                        "-x",
+                        "c",
+                        jniSource.absolutePath,
+                        "-x",
+                        "none",
+                        thorvgStaticArchive.absolutePath,
+                        "-static-libgcc",
+                        "-static-libstdc++",
+                        "-lwinpthread",
+                        "-o",
+                        outputFile.absolutePath
+                    )
+                }
+            }
 
             "linux" -> runCommand(
                 projectDir,
