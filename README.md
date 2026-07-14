@@ -85,4 +85,6 @@ canvas.draw(true);
 canvas.sync();
 ```
 
+`Thorvg.load()` first checks default system library paths, then falls back to the bundled native library in the JAR by extracting it into a temporary directory and loading it from there.
+
 The software canvas target uses a direct `IntBuffer`, which is required so ThorVG can safely keep the native buffer pointer across draw/sync calls.

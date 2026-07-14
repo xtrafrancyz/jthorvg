@@ -93,6 +93,10 @@ tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
 
+tasks.withType<Javadoc> {
+    (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:all,-missing", "-quiet")
+}
+
 val buildVendoredThorvg = tasks.register("buildVendoredThorvg") {
     group = "build"
     description = "Builds the vendored ThorVG static library for the current host."
@@ -123,8 +127,8 @@ val buildVendoredThorvg = tasks.register("buildVendoredThorvg") {
             "--buildtype=release",
             "-Db_staticpic=true",
             "-Ddefault_library=static",
-            "-Dengines=cpu",
-            "-Dloaders=svg",
+            "-Dengines=cpu,gl",
+            "-Dloaders=all",
             "-Dbindings=capi",
             "-Dsavers=[]",
             "-Dtools=[]",
