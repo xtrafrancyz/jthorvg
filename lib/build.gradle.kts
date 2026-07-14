@@ -243,4 +243,9 @@ tasks.named<Jar>("sourcesJar") {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+    val os = hostOs.get()
+    if (os != "unsupported") {
+        val nativeDir = layout.buildDirectory.dir("native/$os").get().asFile
+        systemProperty("java.library.path", nativeDir.absolutePath)
+    }
 }
