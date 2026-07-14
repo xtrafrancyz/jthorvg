@@ -190,13 +190,18 @@ val buildNative = tasks.register("buildNative") {
                 "cl",
                 "/nologo",
                 "/LD",
+                "/MD",
+                "/DTVG_STATIC",
                 "/I${javaIncludeDir.absolutePath}",
                 "/I${javaPlatformIncludeDir.absolutePath}",
                 "/I${capiIncludeDir.absolutePath}",
                 jniSource.absolutePath,
                 thorvgStaticLibrary.absolutePath,
                 "/link",
-                "/OUT:${outputFile.absolutePath}"
+                "/OUT:${outputFile.absolutePath}",
+                "ucrt.lib",
+                "vcruntime.lib",
+                "msvcrt.lib"
             )
 
             "linux" -> runCommand(
