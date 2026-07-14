@@ -190,6 +190,7 @@ val buildNative = tasks.register("buildNative") {
                 "cl",
                 "/nologo",
                 "/LD",
+                "/DTVG_STATIC",
                 "/I${javaIncludeDir.absolutePath}",
                 "/I${javaPlatformIncludeDir.absolutePath}",
                 "/I${capiIncludeDir.absolutePath}",
