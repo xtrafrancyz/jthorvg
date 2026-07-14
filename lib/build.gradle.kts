@@ -45,25 +45,22 @@ fun nativeLibraryFileName(os: String): String = when (os) {
     else -> throw GradleException("Unsupported host OS '$os'.")
 }
 
-fun thorvgStaticLibraryFileName(os: String): String = when (os) {
-    "windows" -> "thorvg-1.lib"
-    "linux" -> "libthorvg-1.a"
-    else -> throw GradleException("Unsupported host OS '$os'.")
-}
-
 fun resolveThorvgStaticLibrary(buildDir: File, os: String): File {
-    val expectedFileName = thorvgStaticLibraryFileName(os)
-    val expectedFile = buildDir.resolve("src/$expectedFileName")
-    if (expectedFile.isFile) {
-        return expectedFile
-    }
+    val expectedFile = buildDir.resolve("src/libthorvg-1.a")
+    if (!expectedFile.isFile)
+		throw GradleException("ThorVG static library was not produced at ${expectedFile.absolutePath} ")
 
-    return buildDir.walkTopDown()
-        .firstOrNull { it.isFile && it.name.equals(expectedFileName, ignoreCase = false) }
-        ?: throw GradleException(
-            "ThorVG static library was not produced at ${expectedFile.absolutePath} " +
-                "and no matching '$expectedFileName' file was found under ${buildDir.absolutePath}."
-        )
+	if (os.equals("windows")) {
+		val windowsLibFile = expectedFile.parentFile.resolve("thorvg.lib")
+		try {
+            expectedFile.copyTo(target = windowsLibFile, overwrite = true)
+        } catch (e: Exception) {
+            throw GradleException("Failed to copy ${expectedFile.name} to ${windowsLibFile.name}: ${e.message}", e)
+        }
+        return windowsLibFile
+	}
+	
+    return expectedFile
 }
 
 fun ensureVendoredThorvg() {
@@ -75,8 +72,13 @@ fun ensureVendoredThorvg() {
 fun runCommand(workingDir: File, vararg command: String) {
     val process = ProcessBuilder(*command)
         .directory(workingDir)
-        .inheritIO()
+		.redirectErrorStream(true)
         .start()
+	process.inputStream.bufferedReader().useLines { lines ->
+        lines.forEach { line ->
+            logger.lifecycle(line)
+        }
+    }
     val exitCode = process.waitFor()
     if (exitCode != 0) {
         throw GradleException("Command failed with exit code $exitCode: ${command.joinToString(" ")}")
