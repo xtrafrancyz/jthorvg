@@ -51,6 +51,21 @@ fun thorvgStaticLibraryFileName(os: String): String = when (os) {
     else -> throw GradleException("Unsupported host OS '$os'.")
 }
 
+fun resolveThorvgStaticLibrary(buildDir: File, os: String): File {
+    val expectedFileName = thorvgStaticLibraryFileName(os)
+    val expectedFile = buildDir.resolve("src/$expectedFileName")
+    if (expectedFile.isFile) {
+        return expectedFile
+    }
+
+    return buildDir.walkTopDown()
+        .firstOrNull { it.isFile && it.name.equals(expectedFileName, ignoreCase = false) }
+        ?: throw GradleException(
+            "ThorVG static library was not produced at ${expectedFile.absolutePath} " +
+                "and no matching '$expectedFileName' file was found under ${buildDir.absolutePath}."
+        )
+}
+
 fun ensureVendoredThorvg() {
     if (!vendoredThorvgDir.resolve("meson.build").isFile) {
         throw GradleException("Missing vendored ThorVG source at ${vendoredThorvgDir.absolutePath}.")
@@ -96,7 +111,6 @@ val buildVendoredThorvg = tasks.register("buildVendoredThorvg") {
 
         val os = hostOs.get()
         val buildDir = layout.buildDirectory.dir("thorvg/$os").get().asFile
-        val outputFile = buildDir.resolve("src/${thorvgStaticLibraryFileName(os)}")
         val setupArgs = mutableListOf("meson", "setup")
         if (buildDir.exists()) {
             setupArgs += "--reconfigure"
@@ -124,9 +138,7 @@ val buildVendoredThorvg = tasks.register("buildVendoredThorvg") {
         runCommand(project.rootDir, *setupArgs.toTypedArray())
         runCommand(project.rootDir, "meson", "compile", "-C", buildDir.absolutePath)
 
-        if (!outputFile.isFile) {
-            throw GradleException("ThorVG static library was not produced at ${outputFile.absolutePath}.")
-        }
+        resolveThorvgStaticLibrary(buildDir, os)
     }
 }
 
@@ -153,7 +165,7 @@ val buildNative = tasks.register("buildNative") {
         val os = hostOs.get()
         val toolchainJavaHome = javaHome.get()
         val thorvgBuildDir = layout.buildDirectory.dir("thorvg/$os").get().asFile
-        val thorvgStaticLibrary = thorvgBuildDir.resolve("src/${thorvgStaticLibraryFileName(os)}")
+        val thorvgStaticLibrary = resolveThorvgStaticLibrary(thorvgBuildDir, os)
         val outputFile = layout.buildDirectory.file("native/$os/${nativeLibraryFileName(os)}").get().asFile
         val javaIncludeDir = toolchainJavaHome.resolve("include")
         val javaPlatformIncludeDir = when (os) {
