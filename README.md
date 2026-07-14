@@ -2,6 +2,8 @@
 
 `jthorvg` is a Gradle-based Java library that wraps a focused subset of the [ThorVG](https://github.com/thorvg/thorvg) C API through JNI.
 
+ThorVG is vendored into this repository under `vendor/thorvg`, and the native build links that vendored code directly into the JNI shared library so the final output is a single ready-to-load `.dll` or `.so`.
+
 ## Included wrapper surface
 
 The initial wrapper covers the core pieces needed to render with the software canvas:
@@ -32,31 +34,36 @@ From the repository root:
 ./gradlew build
 ```
 
-## Building the Windows JNI DLL
+## Building the native library
 
-The primary native target is Windows. The Gradle task expects:
+The native build uses the vendored ThorVG sources and produces a single JNI shared library with ThorVG linked in statically.
 
-- a Windows host
-- Microsoft Visual C++ tools available on `PATH` (for example from a Visual Studio Native Tools prompt)
-- ThorVG built separately
-- ThorVG headers and import libraries configured through either environment variables or Gradle properties
+Supported hosts:
 
-Supported configuration values:
+- Linux → `libjthorvg_jni.so`
+- Windows → `jthorvg_jni.dll`
 
-- `THORVG_HOME` → used to derive `src/bindings/capi`
-- `THORVG_INCLUDE_DIR`
-- `THORVG_LIB_DIR`
-- `THORVG_LIBRARY_NAME` (defaults to `thorvg.lib`)
+Required tools:
 
-Example in a Windows Native Tools shell:
+- Java 17+
+- `meson`
+- `ninja`
+- a host C/C++ toolchain
+  - Linux: `gcc` / `g++`
+  - Windows: Microsoft Visual C++ tools on `PATH` (for example from a Visual Studio Native Tools prompt)
 
-```powershell
-$env:THORVG_HOME = 'C:\dev\thorvg'
-$env:THORVG_LIB_DIR = 'C:\dev\thorvg\build\lib'
-.\gradlew.bat :lib:buildWindowsJni
+Build the native library from the repository root with:
+
+```bash
+./gradlew :lib:buildNative
 ```
 
-When built, the JNI DLL is named `jthorvg_jni.dll`.
+The resulting shared library is written to:
+
+- Linux: `lib/build/native/linux/libjthorvg_jni.so`
+- Windows: `lib/build/native/windows/jthorvg_jni.dll`
+
+The default Gradle Java build also packages the current host's shared library into the main artifact resources.
 
 ## Using the library
 

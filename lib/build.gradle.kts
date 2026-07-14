@@ -1,3 +1,6 @@
+import org.gradle.api.GradleException
+import java.util.Locale
+
 plugins {
     `java-library`
 }
@@ -23,20 +26,36 @@ java {
 }
 
 val nativeLibraryBaseName = "jthorvg_jni"
-val nativeOutputDir = layout.buildDirectory.dir("native/windows")
 val packagedNativeResourcesDir = layout.buildDirectory.dir("generated/resources/main")
-val isWindowsHost = providers.systemProperty("os.name").map { it.startsWith("Windows") }
-val thorvgHome = providers.gradleProperty("thorvgHome")
-    .orElse(providers.environmentVariable("THORVG_HOME"))
-val thorvgIncludeDir = providers.gradleProperty("thorvgIncludeDir")
-    .orElse(providers.environmentVariable("THORVG_INCLUDE_DIR"))
-    .orElse(thorvgHome.map { "$it/src/bindings/capi" })
-val thorvgLibDir = providers.gradleProperty("thorvgLibDir")
-    .orElse(providers.environmentVariable("THORVG_LIB_DIR"))
-val thorvgLibraryName = providers.gradleProperty("thorvgLibraryName")
-    .orElse(providers.environmentVariable("THORVG_LIBRARY_NAME"))
-    .orElse("thorvg.lib")
+val vendoredThorvgDir = rootProject.file("vendor/thorvg")
 val javaHome = javaToolchains.launcherFor(java.toolchain).map { it.metadata.installationPath.asFile }
+
+val hostOs = providers.systemProperty("os.name").map { osName ->
+    val normalized = osName.lowercase(Locale.ROOT)
+    when {
+        normalized.contains("windows") -> "windows"
+        normalized.contains("linux") -> "linux"
+        else -> "unsupported"
+    }
+}
+
+fun nativeLibraryFileName(os: String): String = when (os) {
+    "windows" -> "$nativeLibraryBaseName.dll"
+    "linux" -> "lib$nativeLibraryBaseName.so"
+    else -> throw GradleException("Unsupported host OS '$os'.")
+}
+
+fun thorvgStaticLibraryFileName(os: String): String = when (os) {
+    "windows" -> "thorvg-1.lib"
+    "linux" -> "libthorvg-1.a"
+    else -> throw GradleException("Unsupported host OS '$os'.")
+}
+
+fun ensureVendoredThorvg() {
+    if (!vendoredThorvgDir.resolve("meson.build").isFile) {
+        throw GradleException("Missing vendored ThorVG source at ${vendoredThorvgDir.absolutePath}.")
+    }
+}
 
 sourceSets.named("main") {
     resources.srcDir(packagedNativeResourcesDir)
@@ -46,62 +65,154 @@ tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
 
-val buildWindowsJni = tasks.register<Exec>("buildWindowsJni") {
+val buildVendoredThorvg = tasks.register("buildVendoredThorvg") {
     group = "build"
-    description = "Builds the Windows JNI bridge DLL when ThorVG headers/libs and MSVC are available."
+    description = "Builds the vendored ThorVG static library for the current host."
 
-    val outputFile = nativeOutputDir.map { it.file("$nativeLibraryBaseName.dll") }
-    val toolchainJavaHome = javaHome.get()
-    nativeOutputDir.get().asFile.mkdirs()
-
-    inputs.file("src/main/c/jthorvg_jni.c")
-    inputs.property("thorvgIncludeDir", thorvgIncludeDir.orNull ?: "")
-    inputs.property("thorvgLibDir", thorvgLibDir.orNull ?: "")
-    inputs.property("thorvgLibraryName", thorvgLibraryName.orNull ?: "")
-    outputs.file(outputFile)
+    inputs.dir(vendoredThorvgDir)
+    outputs.dir(layout.buildDirectory.dir("thorvg"))
 
     onlyIf {
-        val windows = isWindowsHost.getOrElse(false)
-        if (!windows) {
-            logger.lifecycle("Skipping buildWindowsJni because the host OS is not Windows.")
-            return@onlyIf false
+        val supported = hostOs.get() != "unsupported"
+        if (!supported) {
+            logger.lifecycle("Skipping buildVendoredThorvg because the host OS is not supported.")
         }
-        if (!thorvgIncludeDir.isPresent || !thorvgLibDir.isPresent) {
-            logger.lifecycle("Skipping buildWindowsJni because THORVG include/lib locations are not configured.")
-            return@onlyIf false
-        }
-        true
+        supported
     }
 
-    workingDir = projectDir
-    commandLine(
-        "cl",
-        "/nologo",
-        "/LD",
-        "/I${toolchainJavaHome.resolve("include").absolutePath}",
-        "/I${toolchainJavaHome.resolve("include/win32").absolutePath}",
-        "/I${thorvgIncludeDir.orNull ?: ""}",
-        "src/main/c/jthorvg_jni.c",
-        "/link",
-        "/LIBPATH:${thorvgLibDir.orNull ?: ""}",
-        thorvgLibraryName.get(),
-        "/OUT:${outputFile.get().asFile.absolutePath}"
-    )
+    doLast {
+        ensureVendoredThorvg()
+
+        val os = hostOs.get()
+        val buildDir = layout.buildDirectory.dir("thorvg/$os").get().asFile
+        val outputFile = buildDir.resolve("src/${thorvgStaticLibraryFileName(os)}")
+        val setupArgs = mutableListOf("meson", "setup")
+        if (buildDir.exists()) {
+            setupArgs += "--reconfigure"
+        }
+        setupArgs += listOf(
+            buildDir.absolutePath,
+            vendoredThorvgDir.absolutePath,
+            "--buildtype=release",
+            "-Db_staticpic=true",
+            "-Ddefault_library=static",
+            "-Dengines=cpu",
+            "-Dloaders=svg",
+            "-Dbindings=capi",
+            "-Dsavers=[]",
+            "-Dtools=[]",
+            "-Dextra=[]",
+            "-Dtests=false",
+            "-Dthreads=true",
+            "-Dsimd=false",
+            "-Dlog=false",
+            "-Dfile=true",
+            "-Dpartial=true"
+        )
+
+        exec {
+            commandLine(setupArgs)
+        }
+        exec {
+            commandLine("meson", "compile", "-C", buildDir.absolutePath)
+        }
+
+        if (!outputFile.isFile) {
+            throw GradleException("ThorVG static library was not produced at ${outputFile.absolutePath}.")
+        }
+    }
 }
 
-val packageWindowsJni = tasks.register<Sync>("packageWindowsJni") {
-    dependsOn(buildWindowsJni)
-    from(nativeOutputDir)
-    include("*.dll")
+val buildNative = tasks.register("buildNative") {
+    group = "build"
+    description = "Builds the ready-to-load JNI shared library with vendored ThorVG linked in."
+
+    dependsOn(buildVendoredThorvg)
+    inputs.file("src/main/c/jthorvg_jni.c")
+    inputs.dir(vendoredThorvgDir.resolve("src/bindings/capi"))
+    outputs.dir(layout.buildDirectory.dir("native"))
+
+    onlyIf {
+        val supported = hostOs.get() != "unsupported"
+        if (!supported) {
+            logger.lifecycle("Skipping buildNative because the host OS is not supported.")
+        }
+        supported
+    }
+
+    doLast {
+        ensureVendoredThorvg()
+
+        val os = hostOs.get()
+        val toolchainJavaHome = javaHome.get()
+        val thorvgBuildDir = layout.buildDirectory.dir("thorvg/$os").get().asFile
+        val thorvgStaticLibrary = thorvgBuildDir.resolve("src/${thorvgStaticLibraryFileName(os)}")
+        val outputFile = layout.buildDirectory.file("native/$os/${nativeLibraryFileName(os)}").get().asFile
+        val javaIncludeDir = toolchainJavaHome.resolve("include")
+        val javaPlatformIncludeDir = when (os) {
+            "windows" -> javaIncludeDir.resolve("win32")
+            "linux" -> javaIncludeDir.resolve("linux")
+            else -> throw GradleException("Unsupported host OS '$os'.")
+        }
+        val capiIncludeDir = vendoredThorvgDir.resolve("src/bindings/capi")
+        val jniSource = project.file("src/main/c/jthorvg_jni.c")
+
+        if (!thorvgStaticLibrary.isFile) {
+            throw GradleException("Expected ThorVG static library at ${thorvgStaticLibrary.absolutePath}.")
+        }
+
+        outputFile.parentFile.mkdirs()
+
+        when (os) {
+            "windows" -> exec {
+                workingDir = projectDir
+                commandLine(
+                    "cl",
+                    "/nologo",
+                    "/LD",
+                    "/I${javaIncludeDir.absolutePath}",
+                    "/I${javaPlatformIncludeDir.absolutePath}",
+                    "/I${capiIncludeDir.absolutePath}",
+                    jniSource.absolutePath,
+                    thorvgStaticLibrary.absolutePath,
+                    "/link",
+                    "/OUT:${outputFile.absolutePath}"
+                )
+            }
+
+            "linux" -> exec {
+                workingDir = projectDir
+                commandLine(
+                    "gcc",
+                    "-shared",
+                    "-fPIC",
+                    "-I${javaIncludeDir.absolutePath}",
+                    "-I${javaPlatformIncludeDir.absolutePath}",
+                    "-I${capiIncludeDir.absolutePath}",
+                    jniSource.absolutePath,
+                    thorvgStaticLibrary.absolutePath,
+                    "-lstdc++",
+                    "-lpthread",
+                    "-o",
+                    outputFile.absolutePath
+                )
+            }
+        }
+
+        if (!outputFile.isFile) {
+            throw GradleException("JNI shared library was not produced at ${outputFile.absolutePath}.")
+        }
+    }
+}
+
+val packageNative = tasks.register<Sync>("packageNative") {
+    dependsOn(buildNative)
+    from(layout.buildDirectory.dir("native"))
     into(packagedNativeResourcesDir)
 }
 
 tasks.named<ProcessResources>("processResources") {
-    dependsOn(packageWindowsJni)
-}
-
-tasks.named<Jar>("sourcesJar") {
-    dependsOn(packageWindowsJni)
+    dependsOn(packageNative)
 }
 
 tasks.named<Test>("test") {
