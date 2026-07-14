@@ -65,6 +65,20 @@ The resulting shared library is written to:
 
 The default Gradle Java build also packages the current host's shared library into the main artifact resources.
 
+## CI workflows for merged cross-platform JAR
+
+The repository includes two GitHub Actions workflows:
+
+- **Build Native Binaries** (`.github/workflows/build.yml`) compiles and uploads Linux and Windows JNI libraries as workflow artifacts.
+- **Merge Native Binaries And Publish JAR** (`.github/workflows/merge-and-publish.yml`) downloads those artifacts, merges them into one resource tree (`linux/` + `windows/`), builds the final JAR, and can publish it to GitHub Packages.
+
+For manual runs, trigger **Merge Native Binaries And Publish JAR** with:
+
+- `native_run_id`: a successful **Build Native Binaries** run id
+- `publish`: set to `true` to run `gradlew publish`
+
+Publishing uses `GITHUB_ACTOR` and `GITHUB_TOKEN` (or Gradle properties `gpr.user` and `gpr.key`) for authentication.
+
 ## Using the library
 
 Load the JNI bridge before calling ThorVG APIs:

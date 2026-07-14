@@ -1,0 +1,104 @@
+name: Merge Native Binaries And Publish JAR
+
+on:
+  workflow_run:
+    workflows: ["Build Native Binaries"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      native_run_id:
+        description: "Run ID of the completed Build Native Binaries workflow"
+        required: true
+        type: string
+      publish:
+        description: "Publish final JAR to GitHub Packages"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  actions: read
+  packages: write
+
+jobs:
+  merge-native-and-build-jar:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Set native build run ID
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            echo "NATIVE_RUN_ID=${{ github.event.workflow_run.id }}" >> "$GITHUB_ENV"
+          else
+            echo "NATIVE_RUN_ID=${{ inputs.native_run_id }}" >> "$GITHUB_ENV"
+          fi
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          architecture: x64
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Download Linux native artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: jthorvg-native-linux-amd64
+          path: build/ci-native/linux-artifact
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.NATIVE_RUN_ID }}
+
+      - name: Download Windows native artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: jthorvg-native-windows-amd64
+          path: build/ci-native/windows-artifact
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.NATIVE_RUN_ID }}
+
+      - name: Merge native binaries
+        shell: bash
+        run: |
+          mkdir -p build/ci-native/linux
+          mkdir -p build/ci-native/windows
+          cp "$(find build/ci-native/linux-artifact -type f -name 'libjthorvg_jni.so' | head -n 1)" build/ci-native/linux/libjthorvg_jni.so
+          cp "$(find build/ci-native/windows-artifact -type f -name 'jthorvg_jni.dll' | head -n 1)" build/ci-native/windows/jthorvg_jni.dll
+          test -f build/ci-native/linux/libjthorvg_jni.so
+          test -f build/ci-native/windows/jthorvg_jni.dll
+
+      - name: Build merged final JAR
+        run: ./gradlew clean build -x test -PprebuiltNativeDir=build/ci-native
+
+      - name: Upload final JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jthorvg-final-jar
+          if-no-files-found: error
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+            !build/libs/*-javadoc.jar
+
+      - name: Publish final JAR
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew publish -x test -PprebuiltNativeDir=build/ci-native

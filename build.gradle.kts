@@ -29,6 +29,7 @@ val nativeLibraryBaseName = "jthorvg_jni"
 val packagedNativeResourcesDir = layout.buildDirectory.dir("generated/resources/main")
 val vendoredThorvgDir = project.file("src/main/c/thorvg")
 val javaHome = javaToolchains.launcherFor(java.toolchain).map { it.metadata.installationPath.asFile }
+val prebuiltNativeDir = providers.gradleProperty("prebuiltNativeDir").map { project.file(it) }
 
 val hostOs = providers.systemProperty("os.name").map { osName ->
     val normalized = osName.lowercase(Locale.ROOT)
@@ -275,8 +276,24 @@ val buildNative = tasks.register("buildNative") {
 }
 
 val packageNative = tasks.register<Sync>("packageNative") {
-    dependsOn(buildNative)
-    from(layout.buildDirectory.dir("native"))
+    if (prebuiltNativeDir.isPresent) {
+        val prebuiltDir = prebuiltNativeDir.get()
+        from(prebuiltDir)
+        doFirst {
+            if (!prebuiltDir.isDirectory) {
+                throw GradleException("Configured prebuilt native directory does not exist: ${prebuiltDir.absolutePath}")
+            }
+            if (!prebuiltDir.resolve("linux/lib$nativeLibraryBaseName.so").isFile) {
+                throw GradleException("Missing Linux JNI library in prebuilt native directory.")
+            }
+            if (!prebuiltDir.resolve("windows/$nativeLibraryBaseName.dll").isFile) {
+                throw GradleException("Missing Windows JNI library in prebuilt native directory.")
+            }
+        }
+    } else {
+        dependsOn(buildNative)
+        from(layout.buildDirectory.dir("native"))
+    }
     into(packagedNativeResourcesDir)
 }
 
@@ -294,5 +311,46 @@ tasks.named<Test>("test") {
     if (os != "unsupported") {
         val nativeDir = layout.buildDirectory.dir("native/$os").get().asFile
         systemProperty("java.library.path", nativeDir.absolutePath)
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+            pom {
+                name.set("jthorvg")
+                description.set("ThorVG JNI bindings for Java")
+                url.set("https://github.com/xtrafrancyz/jthorvg")
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://opensource.org/license/mit/")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:https://github.com/xtrafrancyz/jthorvg.git")
+                    developerConnection.set("scm:git:ssh://git@github.com/xtrafrancyz/jthorvg.git")
+                    url.set("https://github.com/xtrafrancyz/jthorvg")
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            val githubRepository = providers.environmentVariable("GITHUB_REPOSITORY")
+                .orElse("xtrafrancyz/jthorvg")
+            url = uri("https://maven.pkg.github.com/${githubRepository.get()}")
+            credentials {
+                username = providers.environmentVariable("GITHUB_ACTOR")
+                    .orElse(providers.gradleProperty("gpr.user"))
+                    .orNull
+                password = providers.environmentVariable("GITHUB_TOKEN")
+                    .orElse(providers.gradleProperty("gpr.key"))
+                    .orNull
+            }
+        }
     }
 }

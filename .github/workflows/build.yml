@@ -1,13 +1,16 @@
-name: Build
+name: Build Native Binaries
 
 on:
   push:
     branches:
       - main
+    tags:
+      - "v*"
   pull_request:
+  workflow_dispatch:
 
 jobs:
-  build:
+  build-native:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -18,14 +21,16 @@ jobs:
             os: ubuntu-latest
             platform: linux
             java-arch: x64
-            gradle-command: ./gradlew build
-            artifact-name: jthorvg-linux-amd64
+            gradle-command: ./gradlew buildNative
+            native-file: build/native/linux/libjthorvg_jni.so
+            artifact-name: jthorvg-native-linux-amd64
           - name: Windows amd64
             os: windows-latest
             platform: windows
             java-arch: x64
-            gradle-command: .\gradlew.bat build
-            artifact-name: jthorvg-windows-amd64
+            gradle-command: .\gradlew.bat buildNative
+            native-file: build/native/windows/jthorvg_jni.dll
+            artifact-name: jthorvg-native-windows-amd64
 
     steps:
       - name: Check out repository
@@ -66,11 +71,9 @@ jobs:
       - name: Build library
         run: ${{ matrix.gradle-command }}
 
-      - name: Upload build artifacts
+      - name: Upload native binary artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}
           if-no-files-found: error
-          path: |
-            build/libs/*
-            build/native/${{ matrix.platform }}/*
+          path: ${{ matrix.native-file }}
