@@ -10,8 +10,8 @@ repositories {
 }
 
 dependencies {
-    testImplementation(libs.junit.jupiter)
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.0.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.0.1")
 }
 
 group = "io.github.xtrafrancyz"
