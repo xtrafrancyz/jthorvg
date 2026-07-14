@@ -275,21 +275,28 @@ val buildNative = tasks.register("buildNative") {
     }
 }
 
+val verifyPrebuiltNative = tasks.register("verifyPrebuiltNative") {
+    onlyIf { prebuiltNativeDir.isPresent }
+
+    doLast {
+        val prebuiltDir = prebuiltNativeDir.get()
+        if (!prebuiltDir.isDirectory) {
+            throw GradleException("Configured prebuilt native directory does not exist: ${prebuiltDir.absolutePath}")
+        }
+        if (!prebuiltDir.resolve("linux/lib$nativeLibraryBaseName.so").isFile) {
+            throw GradleException("Missing Linux JNI library in prebuilt native directory.")
+        }
+        if (!prebuiltDir.resolve("windows/$nativeLibraryBaseName.dll").isFile) {
+            throw GradleException("Missing Windows JNI library in prebuilt native directory.")
+        }
+    }
+}
+
 val packageNative = tasks.register<Sync>("packageNative") {
     if (prebuiltNativeDir.isPresent) {
         val prebuiltDir = prebuiltNativeDir.get()
+        dependsOn(verifyPrebuiltNative)
         from(prebuiltDir)
-        doFirst {
-            if (!prebuiltDir.isDirectory) {
-                throw GradleException("Configured prebuilt native directory does not exist: ${prebuiltDir.absolutePath}")
-            }
-            if (!prebuiltDir.resolve("linux/lib$nativeLibraryBaseName.so").isFile) {
-                throw GradleException("Missing Linux JNI library in prebuilt native directory.")
-            }
-            if (!prebuiltDir.resolve("windows/$nativeLibraryBaseName.dll").isFile) {
-                throw GradleException("Missing Windows JNI library in prebuilt native directory.")
-            }
-        }
     } else {
         dependsOn(buildNative)
         from(layout.buildDirectory.dir("native"))

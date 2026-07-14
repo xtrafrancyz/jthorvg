@@ -39,6 +39,7 @@ jobs:
       - name: Set native build run ID
         shell: bash
         run: |
+          echo "CI_NATIVE_DIR=$RUNNER_TEMP/jthorvg-ci-native" >> "$GITHUB_ENV"
           if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
             echo "NATIVE_RUN_ID=${{ github.event.workflow_run.id }}" >> "$GITHUB_ENV"
           else
@@ -59,7 +60,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: jthorvg-native-linux-amd64
-          path: build/ci-native/linux-artifact
+          path: ${{ env.CI_NATIVE_DIR }}/linux-artifact
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: ${{ env.NATIVE_RUN_ID }}
@@ -68,7 +69,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: jthorvg-native-windows-amd64
-          path: build/ci-native/windows-artifact
+          path: ${{ env.CI_NATIVE_DIR }}/windows-artifact
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: ${{ env.NATIVE_RUN_ID }}
@@ -76,15 +77,15 @@ jobs:
       - name: Merge native binaries
         shell: bash
         run: |
-          mkdir -p build/ci-native/linux
-          mkdir -p build/ci-native/windows
-          cp "$(find build/ci-native/linux-artifact -type f -name 'libjthorvg_jni.so' | head -n 1)" build/ci-native/linux/libjthorvg_jni.so
-          cp "$(find build/ci-native/windows-artifact -type f -name 'jthorvg_jni.dll' | head -n 1)" build/ci-native/windows/jthorvg_jni.dll
-          test -f build/ci-native/linux/libjthorvg_jni.so
-          test -f build/ci-native/windows/jthorvg_jni.dll
+          rm -rf "$CI_NATIVE_DIR/linux" "$CI_NATIVE_DIR/windows"
+          mkdir -p "$CI_NATIVE_DIR/linux" "$CI_NATIVE_DIR/windows"
+          cp "$(find "$CI_NATIVE_DIR/linux-artifact" -type f -name 'libjthorvg_jni.so' | head -n 1)" "$CI_NATIVE_DIR/linux/libjthorvg_jni.so"
+          cp "$(find "$CI_NATIVE_DIR/windows-artifact" -type f -name 'jthorvg_jni.dll' | head -n 1)" "$CI_NATIVE_DIR/windows/jthorvg_jni.dll"
+          test -f "$CI_NATIVE_DIR/linux/libjthorvg_jni.so"
+          test -f "$CI_NATIVE_DIR/windows/jthorvg_jni.dll"
 
       - name: Build merged final JAR
-        run: ./gradlew clean build -x test -PprebuiltNativeDir=build/ci-native
+        run: ./gradlew clean build -x test -PprebuiltNativeDir="$CI_NATIVE_DIR"
 
       - name: Upload final JAR artifact
         uses: actions/upload-artifact@v4
@@ -101,4 +102,4 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew publish -x test -PprebuiltNativeDir=build/ci-native
+        run: ./gradlew publish -x test -PprebuiltNativeDir="$CI_NATIVE_DIR"
