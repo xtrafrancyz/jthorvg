@@ -1,8 +1,8 @@
-import org.gradle.api.GradleException
 import java.util.Locale
 
 plugins {
     `java-library`
+    `maven-publish`
 }
 
 repositories {
@@ -48,18 +48,18 @@ fun nativeLibraryFileName(os: String): String = when (os) {
 fun resolveThorvgStaticLibrary(buildDir: File, os: String): File {
     val expectedFile = buildDir.resolve("src/libthorvg-1.a")
     if (!expectedFile.isFile)
-		throw GradleException("ThorVG static library was not produced at ${expectedFile.absolutePath} ")
+        throw GradleException("ThorVG static library was not produced at ${expectedFile.absolutePath} ")
 
-	if (os == "windows") {
-		val windowsLibFile = expectedFile.parentFile.resolve("thorvg.lib")
-		try {
+    if (os == "windows") {
+        val windowsLibFile = expectedFile.parentFile.resolve("thorvg.lib")
+        try {
             expectedFile.copyTo(target = windowsLibFile, overwrite = true)
         } catch (e: Exception) {
             throw GradleException("Failed to copy ${expectedFile.name} to ${windowsLibFile.name}: ${e.message}", e)
         }
         return windowsLibFile
-	}
-	
+    }
+
     return expectedFile
 }
 
@@ -72,9 +72,9 @@ fun ensureVendoredThorvg() {
 fun runCommand(workingDir: File, vararg command: String) {
     val process = ProcessBuilder(*command)
         .directory(workingDir)
-		.redirectErrorStream(true)
+        .redirectErrorStream(true)
         .start()
-	process.inputStream.bufferedReader().useLines { lines ->
+    process.inputStream.bufferedReader().useLines { lines ->
         lines.forEach { line ->
             logger.lifecycle(line)
         }
