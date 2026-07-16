@@ -255,7 +255,7 @@ val buildNative = tasks.register("buildNative") {
 
             "linux" -> runCommand(
                 projectDir,
-                "gcc",
+                "g++",
                 "-shared",
                 "-fPIC",
                 "-fvisibility=hidden",
