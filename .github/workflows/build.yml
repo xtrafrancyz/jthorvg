@@ -21,14 +21,14 @@ jobs:
             os: ubuntu-latest
             platform: linux
             java-arch: x64
-            gradle-command: ./gradlew buildNative
+            gradle-command: ./gradlew build
             native-file: build/native/linux/libjthorvg_jni.so
             artifact-name: jthorvg-native-linux-amd64
           - name: Windows amd64
             os: windows-latest
             platform: windows
             java-arch: x64
-            gradle-command: .\gradlew.bat buildNative
+            gradle-command: .\gradlew.bat build
             native-file: build/native/windows/jthorvg_jni.dll
             artifact-name: jthorvg-native-windows-amd64
 

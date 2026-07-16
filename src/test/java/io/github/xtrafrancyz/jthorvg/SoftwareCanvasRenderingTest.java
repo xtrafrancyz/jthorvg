@@ -67,36 +67,23 @@ class SoftwareCanvasRenderingTest {
     }
 
     @Test
-    void testDrawRedRectangleOnWhiteBackgroundAbgr() {
+    void testDrawSvgImageOnCanvas() {
         int width = 10;
         int height = 10;
-        ByteBuffer storage = ByteBuffer.allocateDirect(width * height * Integer.BYTES)
-            .order(ByteOrder.nativeOrder());
-        SoftwareCanvasTarget target = SoftwareCanvasTarget.wrap(
-            storage.asIntBuffer(),
-            width,
-            height,
-            width,
-            ThorvgColorspace.ABGR8888
-        );
-        assertEquals(ThorvgColorspace.ABGR8888, target.colorspace());
+        SoftwareCanvasTarget target = SoftwareCanvasTarget.allocateArgb8888(width, height);
+        assertEquals(ThorvgColorspace.ARGB8888, target.colorspace());
 
         try (SoftwareCanvas canvas = Thorvg.newSoftwareCanvas()) {
             canvas.setTarget(target);
 
-            // 1. Draw white background covering the whole canvas
-            try (Shape bg = Thorvg.newShape()) {
-                bg.appendRect(0, 0, width, height, 0, 0, true);
-                bg.setFillColor(255, 255, 255, 255);
-                canvas.add(bg);
-            }
-
-            // 2. Draw a red rectangle in the center (x=2, y=2, width=6, height=6)
-            try (Shape rect = Thorvg.newShape()) {
-                rect.appendRect(2, 2, 6, 6, 0, 0, true);
-                rect.setFillColor(255, 0, 0, 255);
-                canvas.add(rect);
-            }
+            // Draw an SVG image (a simple red circle)
+            String svgData = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\">" +
+                             "<circle cx=\"5\" cy=\"5\" r=\"4\" fill=\"red\" /></svg>";
+            Picture picture = Thorvg.newPicture();
+            picture.loadData(svgData.getBytes(), "svg", "", true);
+            picture.setOrigin(0, 0);
+            picture.setSize(width, height);
+            canvas.add(picture);
 
             // Draw and sync
             canvas.draw(true);
@@ -105,15 +92,8 @@ class SoftwareCanvasRenderingTest {
 
         IntBuffer pixels = target.pixels();
 
-        // Background pixel at (0, 0) should be white (0xFFFFFFFF)
-        int bgPixel = pixels.get(0);
-        assertEquals(0xFFFFFFFF, bgPixel, "Background pixel at (0,0) must be white");
-
         // Center pixel at (5, 5) should be red.
-        // For ABGR8888 in little-endian native byte order:
-        // High byte (Alpha) = 0xFF, Blue = 0x00, Green = 0x00, Red = 0xFF
-        // Packed as int: 0xFF0000FF
         int centerPixel = pixels.get(5 * width + 5);
-        assertEquals(0xFF0000FF, centerPixel, "Center pixel at (5,5) must be red (0xFF0000FF)");
+        assertEquals(0xFFFF0000, centerPixel, "Center pixel at (5,5) must be red (0xFFFF0000)");
     }
 }
