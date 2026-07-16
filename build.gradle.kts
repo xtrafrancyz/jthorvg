@@ -322,6 +322,10 @@ tasks.named<Test>("test") {
         val nativeDir = layout.buildDirectory.dir("native/$os").get().asFile
         systemProperty("java.library.path", nativeDir.absolutePath)
     }
+
+    testLogging {
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
 }
 
 publishing {
