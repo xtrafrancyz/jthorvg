@@ -16,15 +16,17 @@ public final class Scene extends Paint {
      * <p>
      * Appends the specified paint object to the given scene. Only paint objects
      * added to the scene are considered rendering targets.
+     * <p>
+     * <b>Note:</b> Ownership of the paint object is transferred to the canvas upon
+     * successful addition. To retain ownership, call paint.ref()
+     * before adding it to the scene.
+     * <p>
+     * <b>Note:</b> The rendering order of paint objects follows their order in the root
+     * scene. If layering is required, ensure the paints are added in the
+     * desired order.
      *
      * @param paint A handle to the paint object to be added to the scene.
      *              This parameter must not be null.
-     * <b>Note:</b> Ownership of the paint object is transferred to the canvas upon
-     *       successful addition. To retain ownership, call paint.ref()
-     *       before adding it to the scene.
-     * <b>Note:</b> The rendering order of paint objects follows their order in the root
-     *       scene. If layering is required, ensure the paints are added in the
-     *       desired order.
      */
     public void add(Paint paint) {
         ThorvgResult.fromCode(ThorvgNative.sceneAdd(requireHandle(), paint.requireHandle()))
@@ -37,18 +39,20 @@ public final class Scene extends Paint {
      * Inserts the specified paint object into the scene immediately before the
      * given paint object at. The at parameter must reference an existing
      * paint object already added to the scene.
+     * <p>
+     * <b>Note:</b> Ownership of the target object is transferred to the scene upon
+     * successful addition. To retain ownership, call paint.ref()
+     * before adding it to the scene.
+     * <p>
+     * <b>Note:</b> The rendering order of paint objects follows their order in the root
+     * scene. If layering is required, ensure the paints are added in the
+     * desired order.
      *
      * @param target A handle to the paint object to be inserted into the scene.
      *               This parameter must not be null.
      * @param at     A handle to an existing paint object in the scene before
      *               which target will be inserted.
      *               This parameter must not be null.
-     * <b>Note:</b> Ownership of the target object is transferred to the scene upon
-     *       successful addition. To retain ownership, call paint.ref()
-     *       before adding it to the scene.
-     * <b>Note:</b> The rendering order of paint objects follows their order in the root
-     *       scene. If layering is required, ensure the paints are added in the
-     *       desired order.
      */
     public void insert(Paint target, Paint at) {
         ThorvgResult.fromCode(ThorvgNative.sceneInsert(requireHandle(), target.requireHandle(), at.requireHandle()))

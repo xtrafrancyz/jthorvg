@@ -15,6 +15,17 @@ public final class RadialGradient extends Gradient {
      * the start circle with a center/focal point (fx, fy) and a radius fr.
      * The gradient will be rendered such that the gradient stop at an offset of 100% aligns with the edge of the end circle
      * and the stop at an offset of 0% aligns with the edge of the start circle.
+     * <p>
+     * <b>Note:</b> In case the radius r is zero, an object is filled with a single color using the last color specified in the setColorStops().
+     * <p>
+     * <b>Note:</b> In case the focal point (fx and fy) lies outside the end circle, it is projected onto the edge of the end circle.
+     * <p>
+     * <b>Note:</b> If the start circle doesn't fully fit inside the end circle (after possible repositioning), the fr is reduced accordingly.
+     * <p>
+     * <b>Note:</b> By manipulating the position and size of the focal point, a wide range of visual effects can be achieved, such as directing
+     * the gradient focus towards a specific edge or enhancing the depth and complexity of shading patterns.
+     * If a focal effect is not desired, simply align the focal point (fx and fy) with the center of the end circle (cx and cy)
+     * and set the radius (fr) to zero. This will result in a uniform gradient without any focal variations.
      *
      * @param cx The horizontal coordinate of the center of the end circle.
      * @param cy The vertical coordinate of the center of the end circle.
@@ -22,13 +33,6 @@ public final class RadialGradient extends Gradient {
      * @param fx The horizontal coordinate of the center of the start circle.
      * @param fy The vertical coordinate of the center of the start circle.
      * @param fr The radius of the start circle.
-     *           <b>Note:</b> In case the radius r is zero, an object is filled with a single color using the last color specified in the setColorStops().
-     *           <b>Note:</b> In case the focal point (fx and fy) lies outside the end circle, it is projected onto the edge of the end circle.
-     *           <b>Note:</b> If the start circle doesn't fully fit inside the end circle (after possible repositioning), the fr is reduced accordingly.
-     *           <b>Note:</b> By manipulating the position and size of the focal point, a wide range of visual effects can be achieved, such as directing
-     *           the gradient focus towards a specific edge or enhancing the depth and complexity of shading patterns.
-     *           If a focal effect is not desired, simply align the focal point (fx and fy) with the center of the end circle (cx and cy)
-     *           and set the radius (fr) to zero. This will result in a uniform gradient without any focal variations.
      */
     public void set(float cx, float cy, float r, float fx, float fy, float fr) {
         ThorvgResult.fromCode(ThorvgNative.radialGradientSet(requireHandle(), cx, cy, r, fx, fy, fr))

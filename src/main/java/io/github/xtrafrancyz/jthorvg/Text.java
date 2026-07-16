@@ -12,11 +12,13 @@ public final class Text extends Paint {
      * Sets the font family for the text.
      * <p>
      * This function specifies the name of the font to be used when rendering text.
+     * <p>
+     * <b>Note:</b> This function only sets the font family name. Use setSize() to define the font size.
+     * <p>
+     * <b>Note:</b> If the name is not specified, ThorVG will select an available fallback font.
      *
      * @param name The name of the font. This should match a font available through the canvas backend.
      *             If set to null, ThorVG will attempt to select a fallback font available on the engine.
-     * <b>Note:</b> This function only sets the font family name. Use setSize() to define the font size.
-     * <b>Note:</b> If the name is not specified, ThorVG will select an available fallback font.
      */
     public void setFont(String name) {
         ThorvgResult.fromCode(ThorvgNative.textSetFont(requireHandle(), name))
@@ -29,10 +31,12 @@ public final class Text extends Paint {
      * This function sets the font size used during text rendering.
      * The size is specified in point units, and supports floating-point precision
      * for smooth scaling and animation effects.
+     * <p>
+     * <b>Note:</b> Use this function in combination with setFont() to fully define text appearance.
+     * <p>
+     * <b>Note:</b> Fractional sizes (e.g., 12.5) are supported for sub-pixel rendering and animations.
      *
      * @param size The font size in points. Must be greater than 0.0.
-     * <b>Note:</b> Use this function in combination with setFont() to fully define text appearance.
-     * <b>Note:</b> Fractional sizes (e.g., 12.5) are supported for sub-pixel rendering and animations.
      */
     public void setSize(float size) {
         if (size <= 0.0f) {
@@ -88,10 +92,11 @@ public final class Text extends Paint {
      * If width/height is set on an axis, that axis is constrained by a virtual layout box and
      * the text may wrap/align inside it. If width/height == 0, the axis is
      * unconstrained and align() acts as an anchor on that axis.
+     * <p>
+     * <b>Note:</b> This defines constraints only; alignment/anchoring is controlled by align().
      *
      * @param w Layout width in user space. Use 0 for no horizontal constraint. (Default is 0)
      * @param h Layout height in user space. Use 0 for no vertical constraint. (Default is 0)
-     * <b>Note:</b> This defines constraints only; alignment/anchoring is controlled by align().
      */
     public void layout(float w, float h) {
         ThorvgResult.fromCode(ThorvgNative.textLayout(requireHandle(), w, h))
@@ -151,13 +156,16 @@ public final class Text extends Paint {
      * This function applies a shear transformation to simulate an italic (oblique) style
      * for the current text object. The shear factor determines the degree of slant
      * applied along the X-axis.
+     * <p>
+     * <b>Note:</b> The shear factor will be clamped to the valid range if it exceeds the limits.
+     * <p>
+     * <b>Note:</b> This does not require the font itself to be italic.
+     * It visually simulates the effect by applying a transformation matrix.
+     * <p>
+     * <b>Warning:</b> Excessive slanting may cause visual distortion depending on the font and size.
      *
      * @param shear The shear factor to apply. A value of 0.0 applies no slant, while values around 0.5 result in a strong slant.
      *              Must be in the range [0.0, 0.5]. Recommended value is 0.18.
-     * <b>Note:</b> The shear factor will be clamped to the valid range if it exceeds the limits.
-     * <b>Note:</b> This does not require the font itself to be italic.
-     *       It visually simulates the effect by applying a transformation matrix.
-     * <b>Warning:</b> Excessive slanting may cause visual distortion depending on the font and size.
      */
     public void setItalic(float shear) {
         ThorvgResult.fromCode(ThorvgNative.textSetItalic(requireHandle(), shear))
@@ -169,12 +177,13 @@ public final class Text extends Paint {
      * <p>
      * This function adds an outline to the text with the specified width and RGB color.
      * The outline enhances the visibility of the text by rendering a stroke around its glyphs.
+     * <p>
+     * <b>Note:</b> To disable the outline, set width to 0.
      *
      * @param width The width of the outline. Must be positive value. (The default is 0)
      * @param r     Red component of the outline color (0–255).
      * @param g     Green component of the outline color (0–255).
      * @param b     Blue component of the outline color (0–255).
-     * <b>Note:</b> To disable the outline, set width to 0.
      */
     public void setOutline(float width, int r, int g, int b) {
         ThorvgResult.fromCode(ThorvgNative.textSetOutline(requireHandle(), width, r, g, b))
@@ -183,11 +192,12 @@ public final class Text extends Paint {
 
     /**
      * Sets the text solid color.
+     * <p>
+     * <b>Note:</b> Either a solid color or a gradient fill is applied, depending on what was set as last.
      *
      * @param r The red color channel value in the range [0 ~ 255]. The default value is 0.
      * @param g The green color channel value in the range [0 ~ 255]. The default value is 0.
      * @param b The blue color channel value in the range [0 ~ 255]. The default value is 0.
-     * <b>Note:</b> Either a solid color or a gradient fill is applied, depending on what was set as last.
      */
     public void setColor(int r, int g, int b) {
         ThorvgResult.fromCode(ThorvgNative.textSetColor(requireHandle(), r, g, b))
@@ -196,9 +206,10 @@ public final class Text extends Paint {
 
     /**
      * Sets the gradient fill for the text.
+     * <p>
+     * <b>Note:</b> Either a solid color or a gradient fill is applied, depending on what was set as last.
      *
      * @param gradient The linear or radial gradient fill.
-     * <b>Note:</b> Either a solid color or a gradient fill is applied, depending on what was set as last.
      */
     public void setGradient(Gradient gradient) {
         ThorvgResult.fromCode(ThorvgNative.textSetGradient(requireHandle(), gradient.requireHandle()))

@@ -15,19 +15,21 @@ public final class SoftwareCanvas extends Canvas {
      * <p>
      * For optimisation reasons TVG does not allocate memory for the output buffer on its own.
      * The buffer of a desirable size should be allocated and owned by the caller.
+     * <p>
+     * <b>Warning:</b> Do not access buffer during draw() - sync(). It should not be accessed while the engine is writing on it.
+     * <p>
+     * <b>Note:</b> Currently, only TVG_COLORSPACE_ABGR8888, TVG_COLORSPACE_ARGB8888, TVG_COLORSPACE_ABGR8888S, and TVG_COLORSPACE_ARGB8888S are supported for cs.
      *
      * @param target The software canvas target buffer configuration.
-     * <b>Warning:</b> Do not access buffer during draw() - sync(). It should not be accessed while the engine is writing on it.
-     * <b>Note:</b> Currently, only TVG_COLORSPACE_ABGR8888, TVG_COLORSPACE_ARGB8888, TVG_COLORSPACE_ABGR8888S, and TVG_COLORSPACE_ARGB8888S are supported for cs.
      */
     public void setTarget(SoftwareCanvasTarget target) {
         ThorvgResult.fromCode(ThorvgNative.swCanvasSetTarget(
-            requireHandle(),
-            target.nativeBuffer(),
-            target.stride(),
-            target.width(),
-            target.height(),
-            target.colorspace().code()))
+                requireHandle(),
+                target.nativeBuffer(),
+                target.stride(),
+                target.width(),
+                target.height(),
+                target.colorspace().code()))
             .throwIfError("tvg_swcanvas_set_target");
         this.target = target;
     }

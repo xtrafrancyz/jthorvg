@@ -74,14 +74,15 @@ public abstract class Paint extends NativeHandle {
      * Sets the visibility of the Paint object.
      * <p>
      * This is useful for selectively excluding paint objects during rendering.
+     * <p>
+     * <b>Note:</b> An invisible object is not considered inactive—it may still participate
+     * in internal update processing if its properties are updated, but it will not
+     * be taken into account for the final drawing output. To completely deactivate
+     * a paint object, remove it from the canvas.
      *
      * @param visible A boolean flag indicating visibility. The default is true.
      *                true, the object will be rendered by the engine.
      *                false, the object will be excluded from the drawing process.
-     * <b>Note:</b> An invisible object is not considered inactive—it may still participate
-     *       in internal update processing if its properties are updated, but it will not
-     *       be taken into account for the final drawing output. To completely deactivate
-     *       a paint object, remove it from the canvas.
      */
     public final void setVisible(boolean visible) {
         ThorvgResult.fromCode(ThorvgNative.paintSetVisible(requireHandle(), visible))
@@ -162,9 +163,10 @@ public abstract class Paint extends NativeHandle {
 
     /**
      * Sets the opacity of the given Paint.
+     * <p>
+     * <b>Note:</b> Setting the opacity with this API may require multiple renderings using a composition. It is recommended to avoid changing the opacity if possible.
      *
      * @param opacity The opacity value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque.
-     * <b>Note:</b> Setting the opacity with this API may require multiple renderings using a composition. It is recommended to avoid changing the opacity if possible.
      */
     public final void setOpacity(int opacity) {
         if (opacity < 0 || opacity > 255) {
@@ -197,16 +199,20 @@ public abstract class Paint extends NativeHandle {
      * <p>
      * The paint must be updated in a Canvas beforehand—typically after the Canvas has been
      * drawn and synchronized.
+     * <p>
+     * <b>Note:</b> To test a single point, set the region size to w = 1, h = 1.
+     * <p>
+     * <b>Note:</b> For efficiency, an AABB (axis-aligned bounding box) test is performed internally before precise hit detection.
+     * <p>
+     * <b>Note:</b> This test does not take into account the results of blending or masking.
+     * <p>
+     * <b>Note:</b> This test does take into account the the hidden paints as well.
      *
      * @param x      The x-coordinate of the top-left corner of the test region.
      * @param y      The y-coordinate of the top-left corner of the test region.
      * @param width  The width of the region to test. Must be greater than 0; defaults to 1.
      * @param height The height of the region to test. Must be greater than 0; defaults to 1.
      * @return true if any part of the region intersects the filled area; otherwise, false.
-     * <b>Note:</b> To test a single point, set the region size to w = 1, h = 1.
-     * <b>Note:</b> For efficiency, an AABB (axis-aligned bounding box) test is performed internally before precise hit detection.
-     * <b>Note:</b> This test does not take into account the results of blending or masking.
-     * <b>Note:</b> This test does take into account the the hidden paints as well.
      */
     public final boolean intersects(int x, int y, int width, int height) {
         return ThorvgNative.paintIntersects(requireHandle(), x, y, width, height);

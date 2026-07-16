@@ -19,14 +19,16 @@ public abstract class Canvas extends NativeHandle {
      * Adds the specified paint into the canvas root scene. Only paints added to
      * the canvas are considered rendering targets. The canvas retains the paint
      * object until it is explicitly removed via remove().
+     * <p>
+     * <b>Note:</b> Ownership of the paint object is transferred to the canvas upon
+     * successful addition. To retain ownership, call paint.ref()
+     * before adding it to the canvas.
+     * <p>
+     * <b>Note:</b> The rendering order of paint objects follows the order in which they are
+     * added to the canvas. If layering is required, ensure paints are added in
+     * the desired order.
      *
      * @param paint A handle to the paint object to be rendered.
-     * <b>Note:</b> Ownership of the paint object is transferred to the canvas upon
-     *       successful addition. To retain ownership, call paint.ref()
-     *       before adding it to the canvas.
-     * <b>Note:</b> The rendering order of paint objects follows the order in which they are
-     *       added to the canvas. If layering is required, ensure paints are added in
-     *       the desired order.
      */
     public void add(Paint paint) {
         ThorvgResult.fromCode(ThorvgNative.canvasAdd(requireHandle(), paint.requireHandle()))
@@ -40,18 +42,20 @@ public abstract class Canvas extends NativeHandle {
      * at parameter is provided, the paint object is inserted immediately before
      * the specified paint in the root scene. If at is null, the paint object
      * is appended to the end of the root scene.
+     * <p>
+     * <b>Note:</b> Ownership of the target object is transferred to the canvas upon
+     * successful addition. To retain ownership, call paint.ref()
+     * before adding it to the canvas.
+     * <p>
+     * <b>Note:</b> The rendering order of paint objects follows their order in the root
+     * scene. If layering is required, ensure paints are inserted in the
+     * desired order.
      *
      * @param target A handle to the paint object to be inserted into the root scene.
      *               This parameter must not be null.
      * @param at     A handle to an existing paint object in the root scene before
      *               which target will be inserted. If null, target is
      *               appended to the end of the root scene.
-     * <b>Note:</b> Ownership of the target object is transferred to the canvas upon
-     *       successful addition. To retain ownership, call paint.ref()
-     *       before adding it to the canvas.
-     * <b>Note:</b> The rendering order of paint objects follows their order in the root
-     *       scene. If layering is required, ensure paints are inserted in the
-     *       desired order.
      */
     public void insert(Paint target, Paint at) {
         ThorvgResult.fromCode(ThorvgNative.canvasInsert(requireHandle(), target.requireHandle(), at.requireHandle()))
@@ -80,14 +84,16 @@ public abstract class Canvas extends NativeHandle {
      * The specified viewport clips rendering output to the boundaries of that rectangle.
      * <p>
      * Please note that changing the viewport is only allowed at the beginning of the rendering sequence—that is, after calling sync().
+     * <p>
+     * <b>Warning:</b> Changing the viewport is not allowed after calling add(),
+     * remove(), update(), or draw().
+     * <p>
+     * <b>Note:</b> When the target is reset, the viewport will also be reset to match the target size.
      *
      * @param x      The x-coordinate of the upper-left corner of the rectangle.
      * @param y      The y-coordinate of the upper-left corner of the rectangle.
      * @param width  The width of the rectangle.
      * @param height The height of the rectangle.
-     * <b>Warning:</b> Changing the viewport is not allowed after calling add(),
-     *          remove(), update(), or draw().
-     * <b>Note:</b> When the target is reset, the viewport will also be reset to match the target size.
      */
     public void setViewport(int x, int y, int width, int height) {
         ThorvgResult.fromCode(ThorvgNative.canvasSetViewport(requireHandle(), x, y, width, height))
@@ -100,7 +106,9 @@ public abstract class Canvas extends NativeHandle {
      * This function triggers an internal update for all paint instances that have been modified
      * since the last update. It ensures that the canvas state is ready for accurate rendering.
      *
+     * <p>
      * <b>Note:</b> Only paint objects that have been changed will be processed.
+     * <p>
      * <b>Note:</b> If the canvas is configured with multiple threads, the update may be performed asynchronously.
      */
     public void update() {
@@ -109,13 +117,15 @@ public abstract class Canvas extends NativeHandle {
 
     /**
      * Requests the canvas to render the Paint objects.
+     * <b>Note:</b> Clearing the buffer is unnecessary if the canvas will be fully covered
+     * with opaque content. Skipping the clear can improve performance.
+     * <p>
+     * <b>Note:</b> Drawing may be performed asynchronously if the thread count is greater than zero.
+     * To ensure the drawing process is complete, call sync() afterwards.
+     * <p>
+     * <b>Note:</b> If the canvas has not been updated prior to draw(), it may implicitly perform update()
      *
      * @param clear If true, clears the target buffer to zero before drawing.
-     * <b>Note:</b> Clearing the buffer is unnecessary if the canvas will be fully covered
-     *       with opaque content. Skipping the clear can improve performance.
-     * <b>Note:</b> Drawing may be performed asynchronously if the thread count is greater than zero.
-     *       To ensure the drawing process is complete, call sync() afterwards.
-     * <b>Note:</b> If the canvas has not been updated prior to draw(), it may implicitly perform update()
      */
     public void draw(boolean clear) {
         ThorvgResult.fromCode(ThorvgNative.canvasDraw(requireHandle(), clear)).throwIfError("tvg_canvas_draw");

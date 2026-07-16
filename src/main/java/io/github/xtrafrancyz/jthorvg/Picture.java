@@ -96,10 +96,11 @@ public final class Picture extends Paint {
      * This callback is invoked when an external asset reference (such as an image source or file path)
      * is encountered in a Picture object. It allows the user to provide a custom mechanism for loading
      * or substituting assets, such as loading from an external source or a virtual filesystem.
+     * <p>
+     * <b>Note:</b> This function must be called before load()
+     * Setting the resolver after loading will have no effect on asset resolution for that asset.
      *
      * @param resolver A user-defined resolver instance.
-     *                 <b>Note:</b> This function must be called before load()
-     *                 Setting the resolver after loading will have no effect on asset resolution for that asset.
      */
     public void setAssetResolver(PictureAssetResolver resolver) {
         ThorvgResult.fromCode(ThorvgNative.pictureSetAssetResolver(requireHandle(), resolver))

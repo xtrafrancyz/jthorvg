@@ -53,10 +53,11 @@ public final class Thorvg {
      * Internally, it utilizes a task scheduler to efficiently parallelize rendering operations.
      * You can specify the number of worker threads using the threads parameter.
      * During initialization, ThorVG will spawn the specified number of threads.
+     * <p>
+     * <b>Note:</b> The initializer uses internal reference counting to track multiple calls.
+     * The number of threads is fixed on the first call to init() and cannot be changed in subsequent calls.
      *
      * @param threads The number of worker threads to create. A value of zero indicates that only the main thread will be used.
-     * <b>Note:</b> The initializer uses internal reference counting to track multiple calls.
-     *       The number of threads is fixed on the first call to init() and cannot be changed in subsequent calls.
      */
     public static void init(int threads) {
         ensureLoaded();

@@ -18,6 +18,7 @@ public final class Shape extends Paint {
     public static final class PathData {
         public final byte[] cmds;
         public final float[] pts;
+
         public PathData(byte[] cmds, float[] pts) {
             this.cmds = cmds;
             this.pts = pts;
@@ -27,6 +28,7 @@ public final class Shape extends Paint {
     public static final class StrokeDash {
         public final float[] pattern;
         public final float offset;
+
         public StrokeDash(float[] pattern, float offset) {
             this.pattern = pattern;
             this.offset = offset;
@@ -62,10 +64,11 @@ public final class Shape extends Paint {
      * Adds a new point to the sub-path, which results in drawing a line from the current point to the given end-point.
      * <p>
      * The value of the current point is set to the given end-point.
+     * <p>
+     * <b>Note:</b> In case this is the first command in the path, it corresponds to the moveTo() call.
      *
      * @param x The horizontal coordinate of the end-point of the line.
      * @param y The vertical coordinate of the end-point of the line.
-     * <b>Note:</b> In case this is the first command in the path, it corresponds to the moveTo() call.
      */
     public void lineTo(float x, float y) {
         ThorvgResult.fromCode(ThorvgNative.shapeLineTo(requireHandle(), x, y))
@@ -77,6 +80,8 @@ public final class Shape extends Paint {
      * <p>
      * The Bezier curve starts at the current point and ends at the given end-point (x, y). Two control points (cx1, cy1) and (cx2, cy2) are used to determine the shape of the curve.
      * The value of the current point is set to the given end-point.
+     * <p>
+     * <b>Note:</b> In case this is the first command in the path, no data from the path are rendered.
      *
      * @param cx1 The horizontal coordinate of the 1st control point.
      * @param cy1 The vertical coordinate of the 1st control point.
@@ -84,7 +89,6 @@ public final class Shape extends Paint {
      * @param cy2 The vertical coordinate of the 2nd control point.
      * @param x   The horizontal coordinate of the endpoint of the curve.
      * @param y   The vertical coordinate of the endpoint of the curve.
-     * <b>Note:</b> In case this is the first command in the path, no data from the path are rendered.
      */
     public void cubicTo(float cx1, float cy1, float cx2, float cy2, float x, float y) {
         ThorvgResult.fromCode(ThorvgNative.shapeCubicTo(requireHandle(), cx1, cy1, cx2, cy2, x, y))
@@ -115,6 +119,8 @@ public final class Shape extends Paint {
      * <p>
      * The value of the current point is set to (x + rx, y) - in case rx is greater
      * than w/2 the current point is set to (x + w/2, y).
+     * <p>
+     * <b>Note:</b> For rx and ry greater than or equal to the half of w and the half of h, respectively, the shape become an ellipse.
      *
      * @param x         The horizontal coordinate of the upper-left corner of the rectangle.
      * @param y         The vertical coordinate of the upper-left corner of the rectangle.
@@ -123,7 +129,6 @@ public final class Shape extends Paint {
      * @param rx        The x-axis radius of the ellipse defining the rounded corners of the rectangle.
      * @param ry        The y-axis radius of the ellipse defining the rounded corners of the rectangle.
      * @param clockwise Specifies the path direction: true for clockwise, false for counterclockwise.
-     * <b>Note:</b> For rx and ry greater than or equal to the half of w and the half of h, respectively, the shape become an ellipse.
      */
     public void appendRect(float x, float y, float width, float height, float rx, float ry, boolean clockwise) {
         ThorvgResult.fromCode(ThorvgNative.shapeAppendRect(requireHandle(), x, y, width, height, rx, ry, clockwise))
@@ -190,9 +195,10 @@ public final class Shape extends Paint {
      * This function defines the thickness of the stroke applied to all figures
      * in the path object. A stroke is the outline drawn along the edges of the
      * path's geometry.
+     * <p>
+     * <b>Note:</b> A value of width 0 disables the stroke.
      *
      * @param width The width of the stroke in pixels. Must be positive value. (The default is 0)
-     * <b>Note:</b> A value of width 0 disables the stroke.
      */
     public void setStrokeWidth(float width) {
         ThorvgResult.fromCode(ThorvgNative.shapeSetStrokeWidth(requireHandle(), width))
@@ -213,13 +219,15 @@ public final class Shape extends Paint {
 
     /**
      * Sets the shape's stroke color.
+     * <p>
+     * <b>Note:</b> If the stroke width is 0 (default), the stroke will not be visible regardless of the color.
+     * <p>
+     * <b>Note:</b> Either a solid color or a gradient fill is applied, depending on what was set as last.
      *
      * @param red   The red color channel value in the range [0 ~ 255]. The default value is 0.
      * @param green The green color channel value in the range [0 ~ 255]. The default value is 0.
      * @param blue  The blue color channel value in the range [0 ~ 255]. The default value is 0.
      * @param alpha The alpha channel value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque.
-     * <b>Note:</b> If the stroke width is 0 (default), the stroke will not be visible regardless of the color.
-     * <b>Note:</b> Either a solid color or a gradient fill is applied, depending on what was set as last.
      */
     public void setStrokeColor(int red, int green, int blue, int alpha) {
         validateColorComponent("red", red);
@@ -244,9 +252,10 @@ public final class Shape extends Paint {
 
     /**
      * Sets the gradient fill of the stroke for all of the figures from the path.
+     * <p>
+     * <b>Note:</b> Either a solid color or a gradient fill is applied, depending on what was set as last.
      *
      * @param gradient The gradient fill.
-     * <b>Note:</b> Either a solid color or a gradient fill is applied, depending on what was set as last.
      */
     public void setStrokeGradient(Gradient gradient) {
         ThorvgResult.fromCode(ThorvgNative.shapeSetStrokeGradient(requireHandle(), gradient.requireHandle()))
@@ -267,14 +276,18 @@ public final class Shape extends Paint {
 
     /**
      * Sets the shape's stroke dash pattern.
+     * <p>
+     * <b>Note:</b> To reset the stroke dash pattern, pass null to dashPattern.
+     * <p>
+     * <b>Note:</b> Values of dashPattern less than zero are treated as zero.
+     * <p>
+     * <b>Note:</b> If all values in the dashPattern are equal to or less than 0, the dash is ignored.
+     * <p>
+     * <b>Note:</b> If the dashPattern contains an odd number of elements, the sequence is repeated in the same
+     * order to form an even-length pattern, preserving the alternation of dashes and gaps.
      *
      * @param dashPattern An array of alternating dash and gap lengths.
      * @param offset      The shift of the starting point within the repeating dash pattern, from which the pattern begins to be applied.
-     * <b>Note:</b> To reset the stroke dash pattern, pass null to dashPattern.
-     * <b>Note:</b> Values of dashPattern less than zero are treated as zero.
-     * <b>Note:</b> If all values in the dashPattern are equal to or less than 0, the dash is ignored.
-     * <b>Note:</b> If the dashPattern contains an odd number of elements, the sequence is repeated in the same
-     *       order to form an even-length pattern, preserving the alternation of dashes and gaps.
      */
     public void setStrokeDash(float[] dashPattern, float offset) {
         int cnt = dashPattern != null ? dashPattern.length : 0;
@@ -382,12 +395,13 @@ public final class Shape extends Paint {
      * Sets the shape's solid color.
      * <p>
      * The parts of the shape defined as inner are colored.
+     * <p>
+     * <b>Note:</b> Either a solid color or a gradient fill is applied, depending on what was set as last.
      *
      * @param red   The red color channel value in the range [0 ~ 255]. The default value is 0.
      * @param green The green color channel value in the range [0 ~ 255]. The default value is 0.
      * @param blue  The blue color channel value in the range [0 ~ 255]. The default value is 0.
      * @param alpha The alpha channel value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque. The default value is 0.
-     * <b>Note:</b> Either a solid color or a gradient fill is applied, depending on what was set as last.
      */
     public void setFillColor(int red, int green, int blue, int alpha) {
         validateColorComponent("red", red);
@@ -452,9 +466,10 @@ public final class Shape extends Paint {
      * Sets the gradient fill for all of the figures from the path.
      * <p>
      * The parts of the shape defined as inner are filled.
+     * <p>
+     * <b>Note:</b> Either a solid color or a gradient fill is applied, depending on what was set as last.
      *
      * @param gradient The gradient fill.
-     * <b>Note:</b> Either a solid color or a gradient fill is applied, depending on what was set as last.
      */
     public void setGradient(Gradient gradient) {
         ThorvgResult.fromCode(ThorvgNative.shapeSetGradient(requireHandle(), gradient.requireHandle()))

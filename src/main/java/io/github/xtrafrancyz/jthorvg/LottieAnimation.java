@@ -35,9 +35,10 @@ public final class LottieAnimation extends Animation {
 
     /**
      * Deletes a previously generated slot.
+     * <p>
+     * <b>Note:</b> This function should be paired with genSlot.
      *
      * @param id The ID of the slot to delete.
-     * <b>Note:</b> This function should be paired with genSlot.
      */
     public void delSlot(int id) {
         ThorvgResult.fromCode(ThorvgNative.lottieAnimationDelSlot(requireHandle(), id))
@@ -83,8 +84,8 @@ public final class LottieAnimation extends Animation {
     /**
      * Retrieves marker information by index.
      *
-     * @param idx          The zero-based index of the animation marker.
-     * @param beginEndOut  An array to receive [begin, end] frames of the marker.
+     * @param idx         The zero-based index of the animation marker.
+     * @param beginEndOut An array to receive [begin, end] frames of the marker.
      * @return The marker name.
      */
     public String getMarkerInfo(int idx, float[] beginEndOut) {
@@ -117,10 +118,11 @@ public final class LottieAnimation extends Animation {
      * <p>
      * This function controls the rendering quality of effects like blur, shadows, etc.
      * Lower values prioritize performance while higher values prioritize quality.
+     * <p>
+     * <b>Note:</b> This option is used as a hint; its behavior heavily depends on the render backend.
      *
      * @param value The quality level (0-100). 0 represents lowest quality/best performance,
      *              100 represents highest quality/lowest performance, default is 50.
-     * <b>Note:</b> This option is used as a hint; its behavior heavily depends on the render backend.
      */
     public void setQuality(int value) {
         ThorvgResult.fromCode(ThorvgNative.lottieAnimationSetQuality(requireHandle(), value))
@@ -132,9 +134,10 @@ public final class LottieAnimation extends Animation {
      * <p>
      * The resolver is invoked whenever the playback state of an audio layer changes.
      * It allows applications to synchronize audio playback with the animation timeline.
+     * <p>
+     * <b>Note:</b> To disable audio notifications, pass null as resolver.
      *
      * @param resolver A LottieAudioResolver instance.
-     * <b>Note:</b> To disable audio notifications, pass null as resolver.
      */
     public void setAudioResolver(LottieAudioResolver resolver) {
         ThorvgResult.fromCode(ThorvgNative.lottieAnimationSetAudioResolver(requireHandle(), resolver))
