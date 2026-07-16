@@ -145,6 +145,7 @@ val buildVendoredThorvg = tasks.register("buildVendoredThorvg") {
             "--buildtype=release",
             "-Db_staticpic=true",
             "-Ddefault_library=static",
+            "-Db_vscrt=mt",
             "-Dengines=cpu,gl",
             "-Dloaders=all",
             "-Dbindings=capi",
@@ -224,10 +225,7 @@ val buildNative = tasks.register("buildNative") {
                         jniSource.absolutePath,
                         thorvgStaticLibrary.absolutePath,
                         "/link",
-                        "/OUT:${outputFile.absolutePath}",
-                        "ucrt.lib",
-                        "vcruntime.lib",
-                        "msvcrt.lib"
+                        "/OUT:${outputFile.absolutePath}"
                     )
                 } else {
                     logger.lifecycle("MSVC toolchain is unavailable; retrying native build with MinGW g++.")
@@ -235,6 +233,7 @@ val buildNative = tasks.register("buildNative") {
                         projectDir,
                         "g++",
                         "-shared",
+                        "-static",
                         "-DTVG_STATIC",
                         "-I${javaIncludeDir.absolutePath}",
                         "-I${javaPlatformIncludeDir.absolutePath}",
@@ -258,6 +257,7 @@ val buildNative = tasks.register("buildNative") {
                 projectDir,
                 "gcc",
                 "-shared",
+                "-static",
                 "-fPIC",
                 "-I${javaIncludeDir.absolutePath}",
                 "-I${javaPlatformIncludeDir.absolutePath}",
