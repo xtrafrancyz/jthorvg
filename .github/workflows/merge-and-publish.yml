@@ -107,4 +107,4 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-        run: ./gradlew publishAllPublicationsToSonatypeCentralRepository -x test -PprebuiltNativeDir="$CI_NATIVE_DIR"
+        run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository -x test -PprebuiltNativeDir="$CI_NATIVE_DIR"
