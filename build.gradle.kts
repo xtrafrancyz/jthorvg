@@ -262,11 +262,17 @@ val buildNative = tasks.register("buildNative") {
                 "-I${javaIncludeDir.absolutePath}",
                 "-I${javaPlatformIncludeDir.absolutePath}",
                 "-I${capiIncludeDir.absolutePath}",
+                "-x",
+                "c",
                 jniSource.absolutePath,
+                "-x",
+                "none",
                 thorvgStaticLibrary.absolutePath,
                 "-static-libgcc",
                 "-static-libstdc++",
                 "-lpthread",
+                "-lm",
+                "-lc",
                 "-o",
                 outputFile.absolutePath
             )
