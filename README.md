@@ -1,104 +1,247 @@
 # jthorvg
 
-`jthorvg` is a Gradle-based Java library that wraps a focused subset of the [ThorVG](https://github.com/thorvg/thorvg) C API through JNI.
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.xtrafrancyz/jthorvg?color=blue)](https://central.sonatype.com/artifact/io.github.xtrafrancyz/jthorvg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-ThorVG is vendored into this repository under `src/main/c/thorvg`, and the native build links that vendored code directly into the JNI shared library so the final output is a single ready-to-load `.dll` or `.so`.
+Java JNI bindings for [ThorVG](https://github.com/thorvg/thorvg) — a lightweight, open-source vector graphics engine.
 
-## Included wrapper surface
+Render SVG, Lottie animations, shapes, text, and raster images to off-screen pixel buffers on **Linux** and **Windows** (x86_64), all from Java. The native ThorVG library is bundled inside the JAR — no separate installation required.
 
-The initial wrapper covers the core pieces needed to render with the software canvas:
+---
 
-- engine loading, initialization, shutdown, and version lookup
-- software canvas creation and target binding
-- adding paints, updating, drawing, and syncing a canvas
-- shape creation, rectangle paths, fill colors, and paint transforms
-- picture creation, file loading, and sizing
+## Features
 
-The JNI bridge is implemented against ThorVG's C API header from:
+- **SVG** loading and rendering
+- **Lottie** animation playback with frame-level control, markers, tweening, and slot overrides
+- **Shapes** — paths, rectangles, circles, arcs, strokes, solid fills, linear/radial gradients
+- **Pictures** — load PNG, JPEG, WEBP, SVG, Lottie from file, byte array, or raw pixel data
+- **Text** rendering with font loading
+- **Scenes** — group and compose paint objects
+- **Software canvas** (CPU rasterizer) and **OpenGL/ES canvas**
+- Bundled native library — zero extra setup for Linux and Windows (amd64)
 
-`src/main/c/thorvg/src/bindings/capi/thorvg_capi.h`
+## Requirements
 
-## Project layout
+- Java 17+
 
-- `gradlew` / `gradlew.bat` — Gradle wrapper
-- `src/main/java` — Java API
-- `src/main/c/jthorvg_jni.c` — JNI bridge
-- `src/test/java` — focused unit tests for the Java wrapper layer
+## Installation
 
-## Build and test
+### Gradle (Kotlin DSL)
 
-From the repository root:
+```kotlin
+dependencies {
+    implementation("io.github.xtrafrancyz:jthorvg:<version>")
+}
+```
+
+### Gradle (Groovy)
+
+```groovy
+dependencies {
+    implementation 'io.github.xtrafrancyz:jthorvg:<version>'
+}
+```
+
+### Maven
+
+```xml
+<dependency>
+    <groupId>io.github.xtrafrancyz</groupId>
+    <artifactId>jthorvg</artifactId>
+    <version><!-- version --></version>
+</dependency>
+```
+
+Replace `<version>` with the latest version shown in the badge above.
+
+---
+
+## Usage
+
+### 1. Initialize the engine
+
+Load the native library (auto-extracts the bundled binary) and initialize the ThorVG engine once at startup:
+
+```java
+import io.github.xtrafrancyz.jthorvg.*;
+
+// Load the bundled native library (extracts to a temp dir on first call)
+Thorvg.load();
+
+// Initialize with 0 worker threads (main-thread-only rendering)
+// Increase the count to enable parallel rendering
+Thorvg.init(0);
+```
+
+Shut down when done:
+
+```java
+Thorvg.term();
+```
+
+---
+
+### 2. Render a shape to a pixel buffer
+
+```java
+int width = 200;
+int height = 200;
+
+// Allocate an off-screen ARGB8888 buffer
+SoftwareCanvasTarget target = SoftwareCanvasTarget.allocateArgb8888(width, height);
+
+try (SoftwareCanvas canvas = Thorvg.newSoftwareCanvas()) {
+    canvas.setTarget(target);
+
+    // White background
+    try (Shape bg = Thorvg.newShape()) {
+        bg.appendRect(0, 0, width, height, 0, 0, true);
+        bg.setFillColor(255, 255, 255, 255);
+        canvas.add(bg);
+    }
+
+    // Red filled circle
+    try (Shape circle = Thorvg.newShape()) {
+        circle.appendCircle(100, 100, 80, 80);
+        circle.setFillColor(255, 0, 0, 255);
+        canvas.add(circle);
+    }
+
+    canvas.draw(true);
+    canvas.sync();
+}
+
+// Access the rendered pixels (ARGB packed ints)
+java.nio.IntBuffer pixels = target.pixels();
+```
+
+---
+
+### 3. Render an SVG file
+
+```java
+try (SoftwareCanvas canvas = Thorvg.newSoftwareCanvas()) {
+    canvas.setTarget(SoftwareCanvasTarget.allocateArgb8888(512, 512));
+
+    Picture picture = Thorvg.newPicture();
+    picture.load(java.nio.file.Path.of("image.svg"));
+    picture.setSize(512, 512);
+    canvas.add(picture);
+
+    canvas.draw(true);
+    canvas.sync();
+}
+```
+
+SVG data can also be loaded from a byte array:
+
+```java
+byte[] svgBytes = "<svg ...>...</svg>".getBytes();
+picture.loadData(svgBytes, "svg", "", true);
+```
+
+---
+
+### 4. Play a Lottie animation
+
+```java
+LottieAnimation animation = Thorvg.newLottieAnimation();
+Picture picture = animation.getPicture();
+picture.load(java.nio.file.Path.of("animation.json"));
+
+float totalFrames = animation.getTotalFrame();
+float duration    = animation.getDuration(); // seconds
+
+try (SoftwareCanvas canvas = Thorvg.newSoftwareCanvas()) {
+    canvas.setTarget(SoftwareCanvasTarget.allocateArgb8888(512, 512));
+    canvas.add(picture);
+
+    // Render frame 30
+    animation.setFrame(30);
+    canvas.update(picture);
+    canvas.draw(true);
+    canvas.sync();
+}
+
+animation.close();
+```
+
+#### Lottie extras
+
+```java
+// Play a named marker segment
+animation.setMarker("intro");
+
+// Tween between two frames
+animation.tween(0, 60, 0.5f); // 50% between frame 0 and 60
+
+// Override a slot with custom JSON data
+int slotId = animation.genSlot("{\"key\":\"value\"}");
+animation.applySlot(slotId);
+```
+
+---
+
+### 5. Gradients
+
+```java
+try (Shape shape = Thorvg.newShape()) {
+    shape.appendRect(10, 10, 180, 180, 0, 0, true);
+
+    LinearGradient gradient = Thorvg.newLinearGradient();
+    gradient.setLinear(10, 10, 190, 190);
+    // configure color stops via native API ...
+    shape.setFillGradient(gradient);
+
+    canvas.add(shape);
+}
+```
+
+---
+
+## API Overview
+
+| Class | Purpose |
+|---|---|
+| `Thorvg` | Engine lifecycle and factory for all objects |
+| `SoftwareCanvas` | CPU-based off-screen canvas |
+| `GLCanvas` | OpenGL/ES-based canvas |
+| `SoftwareCanvasTarget` | Pixel buffer configuration for `SoftwareCanvas` |
+| `Shape` | Paths, rectangles, circles, arcs, strokes, fills |
+| `Picture` | Images (SVG, PNG, JPEG, Lottie, raw pixels) |
+| `Scene` | Composites multiple paint objects |
+| `Text` | Text rendering with font support |
+| `Animation` | Frame-based animation control |
+| `LottieAnimation` | Extended Lottie controls (markers, tweening, slots) |
+| `LinearGradient` | Linear gradient fill |
+| `RadialGradient` | Radial gradient fill |
+| `Saver` | Export painted content |
+| `Accessor` | Walk and modify paint tree nodes |
+
+---
+
+## Building from Source
+
+Prerequisites: Java 17, Python 3, [Meson](https://mesonbuild.com/) + Ninja, and a C++ compiler (GCC/MinGW or MSVC).
 
 ```bash
-./gradlew test
 ./gradlew build
 ```
 
-## Building the native library
+The build compiles the vendored ThorVG source into a static library and links it into the JNI shared library automatically.
 
-The native build uses the vendored ThorVG sources and produces a single JNI shared library with ThorVG linked in statically.
-
-Supported hosts:
-
-- Linux → `libjthorvg_jni.so`
-- Windows → `jthorvg_jni.dll`
-
-Required tools:
-
-- Java 17+
-- `meson`
-- `ninja`
-- a host C/C++ toolchain
-  - Linux: `gcc` / `g++`
-  - Windows: Microsoft Visual C++ tools on `PATH` (for example from a Visual Studio Native Tools prompt)
-
-Build the native library from the repository root with:
+To skip the native build and supply prebuilt binaries:
 
 ```bash
-./gradlew buildNative
+./gradlew build -PprebuiltNativeDir=/path/to/native-dir
 ```
 
-The resulting shared library is written to:
+The directory must contain `linux/libjthorvg_jni.so` and `windows/jthorvg_jni.dll`.
 
-- Linux: `build/native/linux/libjthorvg_jni.so`
-- Windows: `build/native/windows/jthorvg_jni.dll`
+---
 
-The default Gradle Java build also packages the current host's shared library into the main artifact resources.
+## License
 
-## CI workflows for merged cross-platform JAR
+[MIT License](LICENSE) — see the `LICENSE` file for details.
 
-The repository includes two GitHub Actions workflows:
-
-- **Build Native Binaries** (`.github/workflows/build.yml`) compiles and uploads Linux and Windows JNI libraries as workflow artifacts.
-- **Merge Native Binaries And Publish JAR** (`.github/workflows/merge-and-publish.yml`) downloads those artifacts, merges them into one resource tree (`linux/` + `windows/`), builds the final JAR, and can publish it to GitHub Packages.
-
-For manual runs, trigger **Merge Native Binaries And Publish JAR** with:
-
-- `native_run_id`: a successful **Build Native Binaries** run id
-- `publish`: set to `true` to run `gradlew publish`
-
-Publishing uses `GITHUB_ACTOR` and `GITHUB_TOKEN` (or Gradle properties `gpr.user` and `gpr.key`) for authentication.
-
-## Using the library
-
-Load the JNI bridge before calling ThorVG APIs:
-
-```java
-Thorvg.load();
-Thorvg.init(0);
-
-SoftwareCanvasTarget target = SoftwareCanvasTarget.allocateArgb8888(256, 256);
-SoftwareCanvas canvas = Thorvg.newSoftwareCanvas();
-canvas.setTarget(target);
-
-Shape shape = Thorvg.newShape();
-shape.appendRect(32, 32, 192, 192, 0, 0, true);
-shape.setFillColor(0, 128, 255, 255);
-canvas.add(shape);
-canvas.draw(true);
-canvas.sync();
-```
-
-`Thorvg.load()` first checks default system library paths, then falls back to the bundled native library in the JAR by extracting it into a temporary directory and loading it from there.
-
-The software canvas target uses a direct `IntBuffer`, which is required so ThorVG can safely keep the native buffer pointer across draw/sync calls.
+ThorVG is distributed under the [MIT License](https://github.com/thorvg/thorvg/blob/main/LICENSE).
