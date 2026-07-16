@@ -1,8 +1,10 @@
-import java.util.Locale
+import java.util.*
 
 plugins {
     `java-library`
     `maven-publish`
+    signing
+    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
 }
 
 repositories {
@@ -335,6 +337,13 @@ publishing {
                         url.set("https://opensource.org/license/mit/")
                     }
                 }
+                developers {
+                    developer {
+                        id.set("xtrafrancyz")
+                        name.set("Dmytro Manchynskyi")
+                        email.set("xtrafrancyz@gmail.com")
+                    }
+                }
                 scm {
                     connection.set("scm:git:https://github.com/xtrafrancyz/jthorvg.git")
                     developerConnection.set("scm:git:ssh://git@github.com/xtrafrancyz/jthorvg.git")
@@ -343,21 +352,26 @@ publishing {
             }
         }
     }
+}
 
+signing {
+    val signingKey = System.getenv("GPG_SIGNING_KEY")
+    val signingPassword = System.getenv("GPG_PASSPHRASE")
+    if (!signingKey.isNullOrEmpty() && !signingPassword.isNullOrEmpty()) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign(publishing.publications["mavenJava"])
+    } else {
+        logger.warn("GPG signing key not found. Skipping signing.")
+    }
+}
+
+nexusPublishing {
     repositories {
-        maven {
-            name = "GitHubPackages"
-            val githubRepository = providers.environmentVariable("GITHUB_REPOSITORY")
-                .orElse("xtrafrancyz/jthorvg")
-            url = uri("https://maven.pkg.github.com/${githubRepository.get()}")
-            credentials {
-                username = providers.environmentVariable("GITHUB_ACTOR")
-                    .orElse(providers.gradleProperty("gpr.user"))
-                    .orNull
-                password = providers.environmentVariable("GITHUB_TOKEN")
-                    .orElse(providers.gradleProperty("gpr.key"))
-                    .orNull
-            }
+        create("myNexus") {
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
+            username.set(System.getenv("SONATYPE_USERNAME") ?: "")
+            password.set(System.getenv("SONATYPE_PASSWORD") ?: "")
         }
     }
 }
