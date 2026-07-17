@@ -40,7 +40,9 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: |
+            8
+            17
           architecture: ${{ matrix.java-arch }}
 
       - name: Set up Gradle

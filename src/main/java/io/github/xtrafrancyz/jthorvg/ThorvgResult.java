@@ -15,7 +15,7 @@ public enum ThorvgResult {
     UNKNOWN(255);
 
     private static final Map<Integer, ThorvgResult> BY_CODE = Arrays.stream(values())
-        .collect(Collectors.toUnmodifiableMap(ThorvgResult::code, Function.identity()));
+        .collect(Collectors.toMap(ThorvgResult::code, Function.identity()));
 
     private final int code;
 

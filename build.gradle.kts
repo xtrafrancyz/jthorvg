@@ -12,8 +12,9 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter:6.0.1")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.0.1")
+	testImplementation(platform("org.junit:junit-bom:5.14.4"))
+	testImplementation("org.junit.jupiter:junit-jupiter")
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 group = "io.github.xtrafrancyz"
@@ -21,7 +22,7 @@ version = "0.1.0"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(8)
     }
     withJavadocJar()
     withSourcesJar()

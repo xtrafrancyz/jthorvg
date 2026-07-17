@@ -1,14 +1,12 @@
 package io.github.xtrafrancyz.jthorvg;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.IntBuffer;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import java.nio.IntBuffer;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SoftwareCanvasRenderingTest {
 
@@ -21,6 +19,11 @@ class SoftwareCanvasRenderingTest {
     @AfterAll
     static void tearDown() {
         Thorvg.term();
+    }
+
+    @Test
+    void engineVersion() {
+        Thorvg.version();
     }
 
     @Test
@@ -78,7 +81,7 @@ class SoftwareCanvasRenderingTest {
 
             // Draw an SVG image (a simple red circle)
             String svgData = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\">" +
-                             "<circle cx=\"5\" cy=\"5\" r=\"4\" fill=\"red\" /></svg>";
+                "<circle cx=\"5\" cy=\"5\" r=\"4\" fill=\"red\" /></svg>";
             Picture picture = Thorvg.newPicture();
             picture.loadData(svgData.getBytes(), "svg", "", true);
             picture.setOrigin(0, 0);
