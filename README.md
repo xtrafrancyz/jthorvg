@@ -5,7 +5,7 @@
 
 Java JNI bindings for [ThorVG](https://github.com/thorvg/thorvg) — a lightweight, open-source vector graphics engine.
 
-Render SVG, Lottie animations, shapes, text, and raster images to off-screen pixel buffers on **Linux** and **Windows** (x86_64), all from Java. The native ThorVG library is bundled inside the JAR — no separate installation required.
+Render SVG, Lottie animations, shapes, text, and raster images to off-screen pixel buffers, all from Java. The native ThorVG library is bundled inside the JAR — no separate installation required.
 
 ---
 
@@ -18,11 +18,11 @@ Render SVG, Lottie animations, shapes, text, and raster images to off-screen pix
 - **Text** rendering with font loading
 - **Scenes** — group and compose paint objects
 - **Software canvas** (CPU rasterizer) and **OpenGL/ES canvas**
-- Bundled native library — zero extra setup for Linux and Windows (amd64)
 
 ## Requirements
 
-- Java 17+
+- Java 8+
+- Windows (amd64) or Linux (amd64)
 
 ## Installation
 
