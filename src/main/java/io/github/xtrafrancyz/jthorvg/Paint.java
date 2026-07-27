@@ -334,6 +334,8 @@ public abstract class Paint extends NativeHandle {
      */
     @Override
     public void close() {
+        if (isClosed())
+            return;
         long handle = requireHandle();
         ThorvgResult.fromCode(ThorvgNative.paintRel(handle)).throwIfError("tvg_paint_rel");
         clearHandle();

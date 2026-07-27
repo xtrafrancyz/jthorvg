@@ -73,6 +73,8 @@ public final class Saver extends NativeHandle {
      */
     @Override
     public void close() {
+        if (isClosed())
+            return;
         long handle = requireHandle();
         ThorvgResult.fromCode(ThorvgNative.saverDel(handle)).throwIfError("tvg_saver_del");
         clearHandle();

@@ -146,6 +146,8 @@ public abstract class Canvas extends NativeHandle {
      */
     @Override
     public void close() {
+        if (isClosed())
+            return;
         long handle = requireHandle();
         ThorvgResult.fromCode(ThorvgNative.canvasDestroy(handle)).throwIfError("tvg_canvas_destroy");
         clearHandle();

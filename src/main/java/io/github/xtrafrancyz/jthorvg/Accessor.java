@@ -64,6 +64,8 @@ public final class Accessor extends NativeHandle {
      */
     @Override
     public void close() {
+        if (isClosed())
+            return;
         long handle = requireHandle();
         ThorvgResult.fromCode(ThorvgNative.accessorDel(handle)).throwIfError("tvg_accessor_del");
         clearHandle();

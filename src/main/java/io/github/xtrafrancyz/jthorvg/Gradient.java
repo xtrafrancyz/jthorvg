@@ -126,6 +126,8 @@ public abstract class Gradient extends NativeHandle {
      */
     @Override
     public void close() {
+        if (isClosed())
+            return;
         long handle = requireHandle();
         ThorvgResult.fromCode(ThorvgNative.gradientDel(handle)).throwIfError("tvg_gradient_del");
         clearHandle();

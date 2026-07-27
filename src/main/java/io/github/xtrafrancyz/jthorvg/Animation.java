@@ -122,6 +122,8 @@ public class Animation extends NativeHandle {
      */
     @Override
     public void close() {
+        if (isClosed())
+            return;
         long handle = requireHandle();
         ThorvgResult.fromCode(ThorvgNative.animationDel(handle)).throwIfError("tvg_animation_del");
         clearHandle();
