@@ -71,6 +71,10 @@ final class ThorvgNative {
 
     static native boolean paintGetVisible(long paintHandle);
 
+    static native long paintGetData(long paintHandle);
+
+    static native int paintSetData(long paintHandle, long data);
+
     static native int paintGetId(long paintHandle);
 
     static native int paintSetId(long paintHandle, int id);
@@ -320,6 +324,8 @@ final class ThorvgNative {
     // LottieAnimation APIs
     static native long lottieAnimationNew();
 
+    static native boolean lottieAnimationExpressionsSupported();
+
     static native int lottieAnimationGenSlot(long animHandle, String slot);
 
     static native int lottieAnimationApplySlot(long animHandle, int id);
@@ -337,6 +343,10 @@ final class ThorvgNative {
     static native int lottieAnimationTween(long animHandle, float from, float to, float progress);
 
     static native int lottieAnimationSetQuality(long animHandle, int value);
+
+    static native int lottieAnimationSetVolume(long animHandle, float volume);
+
+    static native float lottieAnimationGetVolume(long animHandle);
 
     static native int lottieAnimationSetAudioResolver(long animHandle, LottieAudioResolver resolver);
 }

@@ -99,6 +99,29 @@ public abstract class Paint extends NativeHandle {
     }
 
     /**
+     * Gets the opaque user-defined data associated with this paint.
+     * <p>
+     * ThorVG does not interpret or manage the lifetime of this value.
+     *
+     * @return The user-defined native pointer, or 0 if none is set.
+     */
+    public final long getData() {
+        return ThorvgNative.paintGetData(requireHandle());
+    }
+
+    /**
+     * Associates an opaque user-defined native pointer with this paint.
+     * <p>
+     * ThorVG does not interpret or manage the lifetime of this value.
+     *
+     * @param data The native pointer value, or 0 to clear it.
+     */
+    public final void setData(long data) {
+        ThorvgResult.fromCode(ThorvgNative.paintSetData(requireHandle(), data))
+            .throwIfError("tvg_paint_set_data");
+    }
+
+    /**
      * Gets the ID of the Paint object.
      *
      * @return The ID of the paint object, or 0 if the ID is not set.

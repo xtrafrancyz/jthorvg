@@ -13,6 +13,15 @@ public final class LottieAnimation extends Animation {
     }
 
     /**
+     * Checks whether Lottie expression support is enabled in ThorVG.
+     *
+     * @return true when expression support is available.
+     */
+    public static boolean expressionsSupported() {
+        return ThorvgNative.lottieAnimationExpressionsSupported();
+    }
+
+    /**
      * Generates a new slot from the given slot data.
      *
      * @param slot The Lottie slot data in JSON format.
@@ -127,6 +136,25 @@ public final class LottieAnimation extends Animation {
     public void setQuality(int value) {
         ThorvgResult.fromCode(ThorvgNative.lottieAnimationSetQuality(requireHandle(), value))
             .throwIfError("tvg_lottie_animation_set_quality");
+    }
+
+    /**
+     * Sets the master volume for media assets in this animation.
+     *
+     * @param volume The volume level.
+     */
+    public void setVolume(float volume) {
+        ThorvgResult.fromCode(ThorvgNative.lottieAnimationSetVolume(requireHandle(), volume))
+            .throwIfError("tvg_lottie_animation_set_volume");
+    }
+
+    /**
+     * Gets the master volume for media assets in this animation.
+     *
+     * @return The volume level.
+     */
+    public float getVolume() {
+        return ThorvgNative.lottieAnimationGetVolume(requireHandle());
     }
 
     /**

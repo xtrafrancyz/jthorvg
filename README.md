@@ -1,7 +1,7 @@
 # jthorvg
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.xtrafrancyz/jthorvg?color=blue)](https://central.sonatype.com/artifact/io.github.xtrafrancyz/jthorvg)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 Java JNI bindings for [ThorVG](https://github.com/thorvg/thorvg) — a lightweight, open-source vector graphics engine.
 

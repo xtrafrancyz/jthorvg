@@ -433,6 +433,30 @@ JNIEXPORT jboolean JNICALL Java_io_github_xtrafrancyz_jthorvg_ThorvgNative_paint
     return tvg_paint_get_visible((Tvg_Paint) to_ptr(paintHandle)) ? JNI_TRUE : JNI_FALSE;
 }
 
+JNIEXPORT jlong JNICALL Java_io_github_xtrafrancyz_jthorvg_ThorvgNative_paintGetData(
+    JNIEnv* env,
+    jclass clazz,
+    jlong paintHandle)
+{
+    (void) env;
+    (void) clazz;
+    return to_jlong(tvg_paint_get_data((Tvg_Paint) to_ptr(paintHandle)));
+}
+
+JNIEXPORT jint JNICALL Java_io_github_xtrafrancyz_jthorvg_ThorvgNative_paintSetData(
+    JNIEnv* env,
+    jclass clazz,
+    jlong paintHandle,
+    jlong data)
+{
+    (void) env;
+    (void) clazz;
+    return (jint) tvg_paint_set_data(
+        (Tvg_Paint) to_ptr(paintHandle),
+        to_ptr(data)
+    );
+}
+
 JNIEXPORT jint JNICALL Java_io_github_xtrafrancyz_jthorvg_ThorvgNative_paintGetId(
     JNIEnv* env,
     jclass clazz,
@@ -2409,6 +2433,15 @@ JNIEXPORT jlong JNICALL Java_io_github_xtrafrancyz_jthorvg_ThorvgNative_lottieAn
     return to_jlong(tvg_lottie_animation_new());
 }
 
+JNIEXPORT jboolean JNICALL Java_io_github_xtrafrancyz_jthorvg_ThorvgNative_lottieAnimationExpressionsSupported(
+    JNIEnv* env,
+    jclass clazz)
+{
+    (void) env;
+    (void) clazz;
+    return tvg_lottie_animation_expressions_supported() ? JNI_TRUE : JNI_FALSE;
+}
+
 JNIEXPORT jint JNICALL Java_io_github_xtrafrancyz_jthorvg_ThorvgNative_lottieAnimationGenSlot(
     JNIEnv* env,
     jclass clazz,
@@ -2540,6 +2573,27 @@ JNIEXPORT jint JNICALL Java_io_github_xtrafrancyz_jthorvg_ThorvgNative_lottieAni
     (void) env;
     (void) clazz;
     return (jint) tvg_lottie_animation_set_quality((Tvg_Animation) to_ptr(animHandle), (uint8_t) value);
+}
+
+JNIEXPORT jint JNICALL Java_io_github_xtrafrancyz_jthorvg_ThorvgNative_lottieAnimationSetVolume(
+    JNIEnv* env,
+    jclass clazz,
+    jlong animHandle,
+    jfloat volume)
+{
+    (void) env;
+    (void) clazz;
+    return (jint) tvg_lottie_animation_set_volume((Tvg_Animation) to_ptr(animHandle), volume);
+}
+
+JNIEXPORT jfloat JNICALL Java_io_github_xtrafrancyz_jthorvg_ThorvgNative_lottieAnimationGetVolume(
+    JNIEnv* env,
+    jclass clazz,
+    jlong animHandle)
+{
+    (void) env;
+    (void) clazz;
+    return (jfloat) tvg_lottie_animation_get_volume((Tvg_Animation) to_ptr(animHandle));
 }
 
 static void native_audio_resolver_wrapper(const Tvg_Audio_Info* info, void* data) {

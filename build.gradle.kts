@@ -18,7 +18,7 @@ dependencies {
 }
 
 group = "io.github.xtrafrancyz"
-version = "0.1.1"
+version = "1.1.2"
 
 java {
     toolchain {

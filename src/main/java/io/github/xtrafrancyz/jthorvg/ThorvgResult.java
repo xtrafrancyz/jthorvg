@@ -12,6 +12,7 @@ public enum ThorvgResult {
     FAILED_ALLOCATION(3),
     MEMORY_CORRUPTION(4),
     NOT_SUPPORTED(5),
+    SYSTEM_ERROR(6),
     UNKNOWN(255);
 
     private static final Map<Integer, ThorvgResult> BY_CODE = Arrays.stream(values())
